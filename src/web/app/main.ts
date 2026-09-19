@@ -39,10 +39,11 @@ coreWorker.addEventListener("message", (event: MessageEvent<CoreResponse>) => {
     return;
   }
 
-  status.textContent =
-    event.data.type === "status"
-      ? event.data.status
-      : `Core error: ${event.data.message}`;
+  if (event.data.type === "status") {
+    status.textContent = event.data.status;
+  } else if (event.data.type === "error") {
+    status.textContent = `Core error: ${event.data.message}`;
+  }
 });
 
 const request: CoreRequest = { id: 1, type: "status" };

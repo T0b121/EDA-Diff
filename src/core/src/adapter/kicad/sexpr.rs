@@ -80,12 +80,6 @@ pub fn arguments_text(value: &Value) -> Vec<String> {
         .collect()
 }
 
-pub fn child_arguments_text(value: &Value, name: &str) -> Vec<String> {
-    child(value, name)
-        .map(arguments_text)
-        .unwrap_or_default()
-}
-
 pub fn child_rotation(value: &Value, name: &str) -> f64 {
     child(value, name)
         .and_then(|node| argument(node, 2))

@@ -1,7 +1,7 @@
 {
   "_filePurpose": [
-    "Web toolchain manifest for EDA-Diff.",
-    "Defines the TypeScript/Vite development commands and browser build dependencies."
+    "Web and WebAssembly toolchain manifest for EDA-Diff.",
+    "Defines the TypeScript/Vite commands and the Rust-to-WASM browser build."
   ],
   "name": "eda-diff",
   "private": true,
@@ -9,7 +9,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
+    "build:core": "wasm-pack build src/core --target web --out-dir ../web/generated/core --release",
     "build:web": "tsc --noEmit && vite build --config vite.config.ts",
+    "build": "npm run build:core && npm run build:web",
     "preview": "vite preview --config vite.config.ts"
   },
   "devDependencies": {

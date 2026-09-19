@@ -73,6 +73,10 @@ fn imports_core_board_objects() {
     assert_eq!(pcb.board_outline.len(), 2);
 
     let footprint = &pcb.footprints[0];
+    assert_eq!(
+        footprint.source.native_id.as_deref(),
+        Some("11111111-1111-1111-1111-111111111111")
+    );
     assert_eq!(footprint.reference, "R1");
     assert_eq!(footprint.value, "10k");
     assert_eq!(footprint.position.x_mm, 10.0);

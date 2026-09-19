@@ -19,13 +19,14 @@ validation.
 
 - Rust/WASM core running through a Web Worker.
 - Canonical, format-independent project, schematic, and PCB data structures.
-- Initial KiCad PCB adapter for nets, footprints, straight tracks, and vias.
-- Local `.kicad_pcb` import test in the Compare view.
+- KiCad PCB adapter for nets, footprints, pads, tracks, vias, and Edge.Cuts geometry.
+- Initial KiCad schematic adapter for symbols, wires, junctions, and labels.
+- Local `.kicad_pcb` and `.kicad_sch` import in the Compare view.
 - Hash-based SPA routing compatible with static GitHub Pages.
 - Browser storage, file-source, and repository-provider boundaries.
 
-KiCad PCB import is intentionally incomplete at this stage. Pads, zones, graphic
-items, board outlines, rules, and schematic parsing are planned additions.
+KiCad import is intentionally incomplete at this stage. PCB zones, additional
+board graphics/rules, schematic pin connectivity, and inferred nets remain planned.
 
 ## Architecture
 

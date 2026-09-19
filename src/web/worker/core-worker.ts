@@ -5,7 +5,11 @@ CPU-heavy parsing, diffing, merging, and validation execute through this worker
 so the browser UI remains responsive for large EDA projects.
 */
 
-import { getCoreStatus, parseKiCadPcb } from "../core/core";
+import {
+  getCoreStatus,
+  parseKiCadPcb,
+  parseKiCadSchematic
+} from "../core/core";
 import type { CoreRequest, CoreResponse } from "./messages";
 
 self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
@@ -21,12 +25,22 @@ self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
       return;
     }
 
+    const source = new TextDecoder("utf-8", { fatal: true }).decode(request.bytes);
+
     if (request.type === "parse-kicad-pcb") {
-      const source = new TextDecoder("utf-8", { fatal: true }).decode(request.bytes);
       respond({
         id: request.id,
         type: "pcb",
         json: await parseKiCadPcb(source, request.path)
+      });
+      return;
+    }
+
+    if (request.type === "parse-kicad-schematic") {
+      respond({
+        id: request.id,
+        type: "schematic",
+        json: await parseKiCadSchematic(source, request.path)
       });
     }
   } catch (error) {

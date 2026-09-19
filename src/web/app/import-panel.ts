@@ -1,8 +1,8 @@
 /*
-Local KiCad PCB import panel controller.
+Local KiCad file import panel controller.
 
-This module transfers selected board bytes to the core worker and presents a
-small canonical-model summary. It never uploads user project data.
+This module transfers selected PCB or schematic bytes to the same core worker and
+presents a compact canonical-model summary. User files are never uploaded.
 */
 
 import type { CoreRequest, CoreResponse } from "../worker/messages";
@@ -19,9 +19,17 @@ interface ParsedPcb {
   board_outline: unknown[];
 }
 
-export function connectPcbImportPanel(worker: Worker): void {
-  const input = document.querySelector<HTMLInputElement>("#pcb-file");
-  const result = document.querySelector<HTMLOutputElement>("#pcb-result");
+interface ParsedSchematic {
+  symbols: unknown[];
+  wires: unknown[];
+  junctions: unknown[];
+  labels: unknown[];
+  nets: unknown[];
+}
+
+export function connectEdaImportPanel(worker: Worker): void {
+  const input = document.querySelector<HTMLInputElement>("#eda-file");
+  const result = document.querySelector<HTMLOutputElement>("#eda-result");
 
   if (!input || !result) {
     return;
@@ -35,14 +43,20 @@ export function connectPcbImportPanel(worker: Worker): void {
       return;
     }
 
-    const id = requestId++;
-    result.textContent = `Parsing ${file.name} locally…`;
+    const type = requestType(file.name);
+    if (!type) {
+      result.textContent = "Unsupported file type.";
+      return;
+    }
 
+    const id = requestId++;
+    const bytes = await file.arrayBuffer();
+    result.textContent = `Parsing ${file.name} locally…`;
     const request: CoreRequest = {
       id,
-      type: "parse-kicad-pcb",
+      type,
       path: file.name,
-      bytes: await file.arrayBuffer()
+      bytes
     };
 
     const listener = (event: MessageEvent<CoreResponse>): void => {
@@ -55,8 +69,22 @@ export function connectPcbImportPanel(worker: Worker): void {
     };
 
     worker.addEventListener("message", listener);
-    worker.postMessage(request, [request.bytes]);
+    worker.postMessage(request, [bytes]);
   });
+}
+
+function requestType(
+  fileName: string
+): "parse-kicad-pcb" | "parse-kicad-schematic" | undefined {
+  if (fileName.endsWith(".kicad_pcb")) {
+    return "parse-kicad-pcb";
+  }
+
+  if (fileName.endsWith(".kicad_sch")) {
+    return "parse-kicad-schematic";
+  }
+
+  return undefined;
 }
 
 function describeResult(response: CoreResponse, fileName: string): string {
@@ -64,11 +92,21 @@ function describeResult(response: CoreResponse, fileName: string): string {
     return `Import failed: ${response.message}`;
   }
 
-  if (response.type !== "pcb") {
-    return `Unexpected response while importing ${fileName}.`;
+  if (response.type === "pcb") {
+    return describePcb(JSON.parse(response.json) as ParsedPcb, fileName);
   }
 
-  const pcb = JSON.parse(response.json) as ParsedPcb;
+  if (response.type === "schematic") {
+    return describeSchematic(
+      JSON.parse(response.json) as ParsedSchematic,
+      fileName
+    );
+  }
+
+  return `Unexpected response while importing ${fileName}.`;
+}
+
+function describePcb(pcb: ParsedPcb, fileName: string): string {
   const padCount = pcb.footprints.reduce(
     (total, footprint) => total + footprint.pads.length,
     0
@@ -82,5 +120,18 @@ function describeResult(response: CoreResponse, fileName: string): string {
     `${pcb.vias.length} vias,`,
     `${pcb.nets.length} nets,`,
     `${pcb.board_outline.length} board edges`
+  ].join(" ");
+}
+
+function describeSchematic(
+  schematic: ParsedSchematic,
+  fileName: string
+): string {
+  return [
+    `${fileName}:`,
+    `${schematic.symbols.length} symbols,`,
+    `${schematic.wires.length} wires,`,
+    `${schematic.junctions.length} junctions,`,
+    `${schematic.labels.length} labels`
   ].join(" ");
 }

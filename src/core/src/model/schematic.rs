@@ -14,6 +14,8 @@ use super::source::SourceRef;
 pub struct Schematic {
     pub symbols: Vec<Symbol>,
     pub wires: Vec<Wire>,
+    pub junctions: Vec<Junction>,
+    pub labels: Vec<Label>,
     pub nets: Vec<Net>,
 }
 
@@ -22,6 +24,8 @@ impl Schematic {
         Self {
             symbols: Vec::new(),
             wires: Vec::new(),
+            junctions: Vec::new(),
+            labels: Vec::new(),
             nets: Vec::new(),
         }
     }
@@ -33,6 +37,8 @@ pub struct Symbol {
     pub reference: String,
     pub value: String,
     pub library_id: Option<String>,
+    pub footprint: Option<String>,
+    pub unit: u32,
     pub position: Point,
     pub rotation: Rotation,
     pub source: SourceRef,
@@ -41,8 +47,33 @@ pub struct Symbol {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Wire {
     pub id: ObjectId,
-    pub start: Point,
-    pub end: Point,
+    pub points: Vec<Point>,
+    pub source: SourceRef,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Junction {
+    pub id: ObjectId,
+    pub position: Point,
+    pub source: SourceRef,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum LabelKind {
+    Local,
+    Global,
+    Hierarchical,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Label {
+    pub id: ObjectId,
+    pub name: String,
+    pub kind: LabelKind,
+    pub position: Point,
+    pub rotation: Rotation,
+    pub electrical_shape: Option<String>,
     pub source: SourceRef,
 }
 

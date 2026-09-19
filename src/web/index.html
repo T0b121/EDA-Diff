@@ -28,10 +28,13 @@ routing, workers, and EDA logic belong to TypeScript and Rust modules.
       </nav>
 
       <section id="compare-panel" class="panel" hidden>
-        <h2>KiCad PCB import test</h2>
-        <p>Select a <code>.kicad_pcb</code> file. It is parsed locally in your browser.</p>
-        <input id="pcb-file" type="file" accept=".kicad_pcb">
-        <output id="pcb-result" class="result" aria-live="polite"></output>
+        <h2>KiCad import test</h2>
+        <p>
+          Select a <code>.kicad_pcb</code> or <code>.kicad_sch</code> file.
+          It is parsed locally in your browser.
+        </p>
+        <input id="eda-file" type="file" accept=".kicad_pcb,.kicad_sch">
+        <output id="eda-result" class="result" aria-live="polite"></output>
       </section>
 
       <p id="build-status" class="status">Loading application…</p>

@@ -5,9 +5,11 @@ This module owns all KiCad-specific parsing and serialization. The rest of the
 application communicates through the generic FormatAdapter boundary.
 */
 
+mod native;
 mod outline;
 mod pad;
 mod pcb;
+mod schematic;
 mod sexpr;
 
 use crate::adapter::error::AdapterError;
@@ -29,9 +31,7 @@ impl FormatAdapter for KiCadAdapter {
         pcb::parse(source, path)
     }
 
-    fn parse_schematic(&self, _source: &str, _path: &str) -> Result<Schematic, AdapterError> {
-        Err(AdapterError::UnsupportedFormat(
-            "KiCad schematic parsing is not implemented yet".to_owned(),
-        ))
+    fn parse_schematic(&self, source: &str, path: &str) -> Result<Schematic, AdapterError> {
+        schematic::parse(source, path)
     }
 }

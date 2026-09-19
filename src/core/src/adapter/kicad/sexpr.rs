@@ -80,8 +80,24 @@ pub fn arguments_text(value: &Value) -> Vec<String> {
         .collect()
 }
 
-pub fn child_arguments_text(value: &Value, name: &str) -> Vec<String> {
+pub fn child_rotation(value: &Value, name: &str) -> f64 {
     child(value, name)
-        .map(arguments_text)
+        .and_then(|node| argument(node, 2))
+        .and_then(number)
+        .unwrap_or(0.0)
+}
+
+pub fn child_xy_points(value: &Value, name: &str) -> Vec<Point> {
+    child(value, name)
+        .map(|node| {
+            children(node, "xy")
+                .filter_map(|xy| {
+                    Some(Point::new(
+                        number(argument(xy, 0)?)?,
+                        number(argument(xy, 1)?)?,
+                    ))
+                })
+                .collect()
+        })
         .unwrap_or_default()
 }

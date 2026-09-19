@@ -154,7 +154,12 @@ function drawPad(
   status: Map<string, ChangeKind>,
   changesOnly: boolean
 ): void {
-  const kind = status.get(pad.id) ?? status.get(footprint.id) ?? "unchanged";
+  const ownKind = status.get(pad.id);
+  const footprintKind = status.get(footprint.id);
+  const kind =
+    ownKind === "unchanged" && footprintKind === "modified"
+      ? "modified"
+      : ownKind ?? footprintKind ?? "unchanged";
   if (changesOnly && kind === "unchanged") return;
 
   const position = transformPadPosition(footprint, pad);
@@ -201,6 +206,7 @@ function drawEdge(
       : arcPath(edge.start, edge.mid, edge.end)
   );
   path.classList.add("pcb-outline");
+  path.setAttribute("stroke-width", "0.2");
   decorate(path, kind, revision);
   svg.append(path);
 }

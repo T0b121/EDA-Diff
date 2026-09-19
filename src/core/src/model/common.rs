@@ -32,3 +32,18 @@ impl Point {
 pub struct Rotation {
     pub degrees: f64,
 }
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct Size {
+    pub width_mm: f64,
+    pub height_mm: f64,
+}
+
+impl Size {
+    pub const fn new(width_mm: f64, height_mm: f64) -> Self {
+        Self {
+            width_mm,
+            height_mm,
+        }
+    }
+}

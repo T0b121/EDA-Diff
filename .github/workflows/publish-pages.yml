@@ -1,0 +1,77 @@
+# Tag-driven GitHub Pages build and deployment workflow.
+#
+# This workflow publishes only tags whose target commit is already contained in
+# main. It builds the browser artifact through the repository build script and
+# keeps release creation independent from ordinary merges into main.
+
+name: Publish tagged main commit
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.main-check.outputs.eligible }}
+
+    steps:
+      - name: Check out tagged revision
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Fetch main
+        run: git fetch --no-tags origin main
+
+      - name: Check whether tag belongs to main
+        id: main-check
+        shell: bash
+        run: |
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+            echo "Tag commit is contained in main."
+          else
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            echo "Tag commit is not contained in main; publication is skipped."
+          fi
+
+      - name: Build site
+        if: steps.main-check.outputs.eligible == 'true'
+        run: bash scripts/build-pages.sh
+
+      - name: Configure GitHub Pages
+        if: steps.main-check.outputs.eligible == 'true'
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        if: steps.main-check.outputs.eligible == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: needs.build.outputs.eligible == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Publish GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -5,7 +5,7 @@ This module bootstraps routing and UI-to-worker communication. Parsing,
 repository access, storage, and EDA domain behavior stay in dedicated modules.
 */
 
-import { connectPcbImportPanel } from "./import-panel";
+import { connectEdaImportPanel } from "./import-panel";
 import { watchRoute, type AppRoute } from "./router";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
@@ -32,7 +32,7 @@ watchRoute((route) => {
   }
 });
 
-connectPcbImportPanel(coreWorker);
+connectEdaImportPanel(coreWorker);
 
 coreWorker.addEventListener("message", (event: MessageEvent<CoreResponse>) => {
   if (!status || event.data.id !== 1) {

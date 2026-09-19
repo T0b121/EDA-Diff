@@ -13,6 +13,37 @@ const SCHEMATIC: &str = r#"
 (kicad_sch
   (version 20231120)
   (generator eeschema)
+  (lib_symbols
+    (symbol "Device:R"
+      (symbol "R_0_1"
+        (rectangle
+          (start -2 -1)
+          (end 2 1)
+          (stroke (width 0.25) (type default))
+          (fill (type none))
+        )
+      )
+      (symbol "R_1_1"
+        (polyline
+          (pts (xy -2 0) (xy 2 0))
+          (stroke (width 0.2) (type default))
+          (fill (type none))
+        )
+        (circle
+          (center 0 0)
+          (radius 0.5)
+          (stroke (width 0.15) (type default))
+          (fill (type background))
+        )
+        (pin passive line
+          (at -3 0 0)
+          (length 1)
+          (name "~")
+          (number "1")
+        )
+      )
+    )
+  )
   (symbol
     (lib_id "Device:R")
     (at 40 50 90)
@@ -48,11 +79,22 @@ fn imports_core_schematic_objects() {
         .parse_schematic(SCHEMATIC, "sample.kicad_sch")
         .expect("sample schematic should parse");
 
+    assert_eq!(schematic.symbol_definitions.len(), 1);
     assert_eq!(schematic.symbols.len(), 1);
     assert_eq!(schematic.wires.len(), 1);
     assert_eq!(schematic.junctions.len(), 1);
     assert_eq!(schematic.labels.len(), 2);
     assert!(schematic.nets.is_empty());
+
+    let definition = &schematic.symbol_definitions[0];
+    assert_eq!(definition.library_id, "Device:R");
+    assert_eq!(definition.units.len(), 2);
+    assert_eq!(definition.units[0].unit, 0);
+    assert_eq!(definition.units[0].graphics.len(), 1);
+    assert_eq!(definition.units[1].unit, 1);
+    assert_eq!(definition.units[1].graphics.len(), 2);
+    assert_eq!(definition.units[1].pins.len(), 1);
+    assert_eq!(definition.units[1].pins[0].number, "1");
 
     let symbol = &schematic.symbols[0];
     assert_eq!(symbol.reference, "R1");
@@ -61,6 +103,8 @@ fn imports_core_schematic_objects() {
     assert_eq!(symbol.footprint.as_deref(), Some("Resistor_SMD:R_0603"));
     assert_eq!(symbol.position.x_mm, 40.0);
     assert_eq!(symbol.rotation.degrees, 90.0);
+    assert!(!symbol.mirror_x);
+    assert!(!symbol.mirror_y);
 
     assert_eq!(schematic.wires[0].points.len(), 2);
     assert_eq!(schematic.junctions[0].position.x_mm, 50.0);

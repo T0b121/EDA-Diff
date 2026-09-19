@@ -75,14 +75,14 @@ export function renderPcbComparison(
   const bounds = calculateBounds(comparison.before, comparison.after);
   const svg = element("svg");
   svg.classList.add("pcb-canvas");
-  svg.setAttribute(
-    "viewBox",
-    `${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`
-  );
+  const fitViewBox = `${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`;
+  svg.setAttribute("viewBox", fitViewBox);
+  svg.dataset.fitViewBox = fitViewBox;
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Visual PCB comparison");
 
-  drawRevision(svg, comparison.before, "before", status, true);
+  drawRevision(svg, comparison.before, "before", status, false);
   drawRevision(svg, comparison.after, "after", status, false);
 
   container.replaceChildren(svg);

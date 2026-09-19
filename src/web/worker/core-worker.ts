@@ -6,6 +6,8 @@ so the browser UI remains responsive for large EDA projects.
 */
 
 import {
+  diffKiCadPcb,
+  diffKiCadSchematic,
   getCoreStatus,
   parseKiCadPcb,
   parseKiCadSchematic
@@ -25,24 +27,43 @@ self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
       return;
     }
 
-    const source = new TextDecoder("utf-8", { fatal: true }).decode(request.bytes);
+    if (request.type === "parse-kicad-pcb" || request.type === "parse-kicad-schematic") {
+      const source = decode(request.bytes);
+      const json =
+        request.type === "parse-kicad-pcb"
+          ? await parseKiCadPcb(source, request.path)
+          : await parseKiCadSchematic(source, request.path);
 
-    if (request.type === "parse-kicad-pcb") {
       respond({
         id: request.id,
-        type: "pcb",
-        json: await parseKiCadPcb(source, request.path)
+        type: request.type === "parse-kicad-pcb" ? "pcb" : "schematic",
+        json
       });
       return;
     }
 
-    if (request.type === "parse-kicad-schematic") {
-      respond({
-        id: request.id,
-        type: "schematic",
-        json: await parseKiCadSchematic(source, request.path)
-      });
-    }
+    const beforeSource = decode(request.beforeBytes);
+    const afterSource = decode(request.afterBytes);
+    const json =
+      request.type === "diff-kicad-pcb"
+        ? await diffKiCadPcb(
+            beforeSource,
+            afterSource,
+            request.beforePath,
+            request.afterPath
+          )
+        : await diffKiCadSchematic(
+            beforeSource,
+            afterSource,
+            request.beforePath,
+            request.afterPath
+          );
+
+    respond({
+      id: request.id,
+      type: "diff",
+      json
+    });
   } catch (error) {
     respond({
       id: request.id,
@@ -51,6 +72,10 @@ self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
     });
   }
 });
+
+function decode(bytes: ArrayBuffer): string {
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
 
 function respond(response: CoreResponse): void {
   self.postMessage(response);

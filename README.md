@@ -21,12 +21,14 @@ validation.
 - Canonical, format-independent project, schematic, and PCB data structures.
 - KiCad PCB adapter for nets, footprints, pads, tracks, vias, and Edge.Cuts geometry.
 - Initial KiCad schematic adapter for symbols, wires, junctions, and labels.
-- Local `.kicad_pcb` and `.kicad_sch` import in the Compare view.
+- Local `.kicad_pcb` and `.kicad_sch` semantic comparison in the Compare view.
+- Structured added/removed/modified/unchanged results with field-level changes.
 - Hash-based SPA routing compatible with static GitHub Pages.
 - Browser storage, file-source, and repository-provider boundaries.
 
-KiCad import is intentionally incomplete at this stage. PCB zones, additional
-board graphics/rules, schematic pin connectivity, and inferred nets remain planned.
+KiCad import and semantic comparison are intentionally incomplete at this stage.
+PCB zones, additional board graphics/rules, schematic pin connectivity, inferred
+nets, and visual rendering remain planned.
 
 ## Architecture
 

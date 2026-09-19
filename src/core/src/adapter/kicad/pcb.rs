@@ -11,7 +11,7 @@ use lexpr::Value;
 
 use crate::adapter::error::AdapterError;
 use crate::model::common::{ObjectId, Rotation};
-use crate::model::pcb::{Footprint, Net, Pcb, Track, Via};
+use crate::model::pcb::{Footprint, Net, Pcb, PcbLayer, PcbLayerKind, Track, Via};
 use super::native::{object_native_id, property, source_ref};
 use super::sexpr;
 
@@ -23,6 +23,7 @@ pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
         ));
     }
 
+    let layers = parse_layers(&root);
     let (nets, net_ids) = parse_nets(&root);
     let footprints = sexpr::children(&root, "footprint")
         .map(|value| parse_footprint(value, path, &net_ids))
@@ -36,12 +37,51 @@ pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
     let board_outline = super::outline::parse(&root, path)?;
 
     Ok(Pcb {
+        layers,
         footprints,
         tracks,
         vias,
         nets,
         board_outline,
     })
+}
+
+fn parse_layers(root: &Value) -> Vec<PcbLayer> {
+    let Some(layers) = sexpr::child(root, "layers") else {
+        return Vec::new();
+    };
+
+    layers
+        .list_iter()
+        .into_iter()
+        .flatten()
+        .skip(1)
+        .filter_map(|node| {
+            let name = sexpr::argument(node, 1)
+                .and_then(sexpr::text)?
+                .to_owned();
+            let native_kind = sexpr::argument(node, 2)
+                .and_then(sexpr::text)
+                .unwrap_or("");
+
+            Some(PcbLayer {
+                kind: classify_layer(&name, native_kind),
+                name,
+            })
+        })
+        .collect()
+}
+
+fn classify_layer(name: &str, native_kind: &str) -> PcbLayerKind {
+    if name.ends_with(".Cu") {
+        PcbLayerKind::Copper
+    } else if matches!(name, "Edge.Cuts" | "Margin" | "F.CrtYd" | "B.CrtYd") {
+        PcbLayerKind::Technical
+    } else if native_kind == "user" {
+        PcbLayerKind::User
+    } else {
+        PcbLayerKind::Other
+    }
 }
 
 fn parse_nets(root: &Value) -> (Vec<Net>, HashMap<i64, ObjectId>) {
@@ -118,6 +158,9 @@ fn parse_via(
         position: sexpr::required_point(value, "at")?,
         diameter_mm: sexpr::child_number(value, "size").unwrap_or(0.0),
         drill_mm: sexpr::child_number(value, "drill").unwrap_or(0.0),
+        layers: sexpr::child(value, "layers")
+            .map(sexpr::arguments_text)
+            .unwrap_or_default(),
         net_id: net_reference(value, net_ids),
         source: source_ref(path, native_id),
     })

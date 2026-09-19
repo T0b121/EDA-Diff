@@ -26,6 +26,8 @@ fn symbol(id: &str, reference: &str, value: &str, x: f64) -> Symbol {
         unit: 1,
         position: Point::new(x, 10.0),
         rotation: Rotation { degrees: 0.0 },
+        mirror_x: false,
+        mirror_y: false,
         source: source(id),
     }
 }

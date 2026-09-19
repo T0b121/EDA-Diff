@@ -10,6 +10,7 @@ import {
   connectPcbViewControls,
   resetPcbViewControls
 } from "../render/pcb-view";
+import { renderPcbLayerControls } from "../render/pcb-layers";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 interface DiffSummary {
@@ -47,10 +48,11 @@ export function connectEdaComparePanel(worker: Worker): void {
   const report = document.querySelector<HTMLElement>("#diff-report");
   const visual = document.querySelector<HTMLElement>("#pcb-visual");
   const controls = document.querySelector<HTMLElement>("#pcb-controls");
+  const layerControls = document.querySelector<HTMLElement>("#pcb-layer-controls");
 
   if (
     !beforeInput || !afterInput || !button || !status || !report ||
-    !visual || !controls
+    !visual || !controls || !layerControls
   ) {
     return;
   }
@@ -78,6 +80,8 @@ export function connectEdaComparePanel(worker: Worker): void {
     report.hidden = true;
     visual.hidden = true;
     controls.hidden = true;
+    layerControls.hidden = true;
+    layerControls.replaceChildren();
     visual.replaceChildren();
 
     const id = requestId++;
@@ -114,6 +118,7 @@ export function connectEdaComparePanel(worker: Worker): void {
         visual.hidden = false;
         controls.hidden = false;
         resetPcbViewControls(visual);
+        renderPcbLayerControls(comparison, visual, layerControls);
         return;
       }
 

@@ -32,4 +32,5 @@ export type CoreResponse =
   | { id: number; type: "schematic"; json: string }
   | { id: number; type: "diff"; json: string }
   | { id: number; type: "pcb-comparison"; json: string }
+  | { id: number; type: "schematic-comparison"; json: string }
   | { id: number; type: "error"; message: string };

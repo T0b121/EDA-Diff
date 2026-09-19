@@ -1,0 +1,33 @@
+<!--
+Main HTML shell for the EDA-Diff single-page application.
+
+Keep this file focused on browser document structure. Application behavior,
+routing, workers, and EDA logic belong to TypeScript and Rust modules.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="EDA-Diff visual and semantic EDA comparison">
+    <title>EDA-Diff</title>
+    <link rel="stylesheet" href="./styles/main.css">
+  </head>
+  <body>
+    <main id="app" class="shell">
+      <p class="eyebrow">EDA-Diff</p>
+      <h1>Visual version control for electronic designs</h1>
+      <p id="view-description">
+        Browser-based schematic and PCB comparison with Git-aware workflows.
+      </p>
+      <nav class="navigation" aria-label="Application">
+        <a href="#/">Home</a>
+        <a href="#/compare">Compare</a>
+        <a href="#/repository">Repository</a>
+      </nav>
+      <p id="build-status" class="status">Loading application…</p>
+    </main>
+
+    <script type="module" src="./app/main.ts"></script>
+  </body>
+</html>

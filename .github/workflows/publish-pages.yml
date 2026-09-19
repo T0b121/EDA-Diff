@@ -1,8 +1,8 @@
 # Tag-driven GitHub Pages build and deployment workflow.
 #
-# This workflow publishes only tags whose target commit is already contained in
-# main. It builds the browser artifact through the repository build script and
-# keeps release creation independent from ordinary merges into main.
+# This workflow publishes only tags whose target commit is contained in main.
+# It prepares Node and Rust/WASM toolchains, builds dist/, and deploys that static
+# artifact while keeping ordinary merges independent from releases.
 
 name: Publish tagged main commit
 
@@ -47,6 +47,24 @@ jobs:
             echo "eligible=false" >> "$GITHUB_OUTPUT"
             echo "Tag commit is not contained in main; publication is skipped."
           fi
+
+      - name: Set up Node.js
+        if: steps.main-check.outputs.eligible == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install web dependencies
+        if: steps.main-check.outputs.eligible == 'true'
+        run: npm install
+
+      - name: Set up Rust WebAssembly target
+        if: steps.main-check.outputs.eligible == 'true'
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        if: steps.main-check.outputs.eligible == 'true'
+        run: cargo install wasm-pack --locked
 
       - name: Build site
         if: steps.main-check.outputs.eligible == 'true'

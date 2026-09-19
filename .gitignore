@@ -1,9 +1,11 @@
 # Repository ignore rules for generated and local-only files.
 #
-# Keep build output and common local editor or operating-system artifacts out of
-# version control. Add tool-specific entries here instead of creating competing
-# ignore files for the same responsibility.
+# Keep dependency caches, compiler output, generated WASM bindings, and common
+# local editor or operating-system artifacts out of version control.
 
 dist/
+node_modules/
+src/core/target/
+src/web/generated/
 .DS_Store
 Thumbs.db

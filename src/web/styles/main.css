@@ -50,3 +50,20 @@ p {
 .navigation a {
   color: inherit;
 }
+
+.panel {
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.result {
+  display: block;
+  margin-top: 1rem;
+  min-height: 1.5rem;
+}

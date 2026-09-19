@@ -12,6 +12,7 @@ use super::source::SourceRef;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pcb {
+    pub layers: Vec<PcbLayer>,
     pub footprints: Vec<Footprint>,
     pub tracks: Vec<Track>,
     pub vias: Vec<Via>,
@@ -22,6 +23,7 @@ pub struct Pcb {
 impl Pcb {
     pub fn empty() -> Self {
         Self {
+            layers: Vec::new(),
             footprints: Vec::new(),
             tracks: Vec::new(),
             vias: Vec::new(),
@@ -29,6 +31,21 @@ impl Pcb {
             board_outline: Vec::new(),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PcbLayer {
+    pub name: String,
+    pub kind: PcbLayerKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum PcbLayerKind {
+    Copper,
+    Technical,
+    User,
+    Other,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -76,6 +93,7 @@ pub struct Via {
     pub position: Point,
     pub diameter_mm: f64,
     pub drill_mm: f64,
+    pub layers: Vec<String>,
     pub net_id: Option<ObjectId>,
     pub source: SourceRef,
 }

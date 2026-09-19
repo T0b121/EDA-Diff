@@ -25,6 +25,7 @@ pub fn parse(source: &str, path: &str) -> Result<Schematic, AdapterError> {
     }
 
     Ok(Schematic {
+        symbol_definitions: super::symbol::parse_definitions(&root),
         symbols: sexpr::children(&root, "symbol")
             .map(|value| parse_symbol(value, path))
             .collect::<Result<Vec<_>, _>>()?,
@@ -56,6 +57,8 @@ fn parse_symbol(value: &Value, path: &str) -> Result<Symbol, AdapterError> {
         rotation: Rotation {
             degrees: sexpr::child_rotation(value, "at"),
         },
+        mirror_x: sexpr::child_text(value, "mirror") == Some("x"),
+        mirror_y: sexpr::child_text(value, "mirror") == Some("y"),
         source: source_ref(path, native_id),
     })
 }

@@ -50,12 +50,13 @@ export function connectEdaImportPanel(worker: Worker): void {
     }
 
     const id = requestId++;
+    const bytes = await file.arrayBuffer();
     result.textContent = `Parsing ${file.name} locally…`;
     const request: CoreRequest = {
       id,
       type,
       path: file.name,
-      bytes: await file.arrayBuffer()
+      bytes
     };
 
     const listener = (event: MessageEvent<CoreResponse>): void => {
@@ -68,7 +69,7 @@ export function connectEdaImportPanel(worker: Worker): void {
     };
 
     worker.addEventListener("message", listener);
-    worker.postMessage(request, [request.bytes]);
+    worker.postMessage(request, [bytes]);
   });
 }
 

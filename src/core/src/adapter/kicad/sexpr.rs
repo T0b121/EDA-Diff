@@ -68,3 +68,20 @@ pub fn required_point(value: &Value, name: &str) -> Result<Point, AdapterError> 
     point(value, name)
         .ok_or_else(|| AdapterError::MissingField(format!("Missing KiCad '{name}' coordinates")))
 }
+
+pub fn arguments_text(value: &Value) -> Vec<String> {
+    value
+        .list_iter()
+        .into_iter()
+        .flatten()
+        .skip(1)
+        .filter_map(text)
+        .map(str::to_owned)
+        .collect()
+}
+
+pub fn child_arguments_text(value: &Value, name: &str) -> Vec<String> {
+    child(value, name)
+        .map(arguments_text)
+        .unwrap_or_default()
+}

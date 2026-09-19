@@ -1,9 +1,8 @@
 /*
 KiCad PCB to canonical PCB converter.
 
-This parser reads the stable board concepts needed by the initial EDA model:
-nets, footprints, straight track segments, and vias. Unsupported objects remain
-in the native source and can be added incrementally without changing the model.
+This parser coordinates conversion of stable board concepts into the canonical
+model. Detailed pad and board-outline conversion stays in focused submodules.
 */
 
 use std::collections::HashMap;
@@ -27,7 +26,7 @@ pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
 
     let (nets, net_ids) = parse_nets(&root);
     let footprints = sexpr::children(&root, "footprint")
-        .map(|value| parse_footprint(value, path))
+        .map(|value| parse_footprint(value, path, &net_ids))
         .collect::<Result<Vec<_>, _>>()?;
     let tracks = sexpr::children(&root, "segment")
         .map(|value| parse_track(value, path, &net_ids))
@@ -35,12 +34,14 @@ pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
     let vias = sexpr::children(&root, "via")
         .map(|value| parse_via(value, path, &net_ids))
         .collect::<Result<Vec<_>, _>>()?;
+    let board_outline = super::outline::parse(&root, path)?;
 
     Ok(Pcb {
         footprints,
         tracks,
         vias,
         nets,
+        board_outline,
     })
 }
 
@@ -58,7 +59,11 @@ fn parse_nets(root: &Value) -> (Vec<Net>, HashMap<i64, ObjectId>) {
     (nets, net_ids)
 }
 
-fn parse_footprint(value: &Value, path: &str) -> Result<Footprint, AdapterError> {
+fn parse_footprint(
+    value: &Value,
+    path: &str,
+    net_ids: &HashMap<i64, ObjectId>,
+) -> Result<Footprint, AdapterError> {
     let native_id = object_native_id(value).unwrap_or_else(|| "unknown".to_owned());
     let mut source = SourceRef::new(SourceFormat::KiCad, path);
     source.native_id = Some(native_id.clone());
@@ -80,6 +85,9 @@ fn parse_footprint(value: &Value, path: &str) -> Result<Footprint, AdapterError>
         position,
         rotation,
         layer: sexpr::child_text(value, "layer").unwrap_or("").to_owned(),
+        pads: sexpr::children(value, "pad")
+            .map(|pad| super::pad::parse(pad, path, net_ids))
+            .collect::<Result<Vec<_>, _>>()?,
         source,
     })
 }
@@ -125,19 +133,19 @@ fn property(value: &Value, name: &str) -> Option<String> {
     })
 }
 
-fn object_native_id(value: &Value) -> Option<String> {
+pub(super) fn object_native_id(value: &Value) -> Option<String> {
     sexpr::child_text(value, "uuid")
         .or_else(|| sexpr::child_text(value, "tstamp"))
         .map(str::to_owned)
 }
 
-fn source_ref(path: &str, native_id: String) -> SourceRef {
+pub(super) fn source_ref(path: &str, native_id: String) -> SourceRef {
     let mut source = SourceRef::new(SourceFormat::KiCad, path);
     source.native_id = Some(native_id);
     source
 }
 
-fn net_reference(value: &Value, net_ids: &HashMap<i64, ObjectId>) -> Option<ObjectId> {
+pub(super) fn net_reference(value: &Value, net_ids: &HashMap<i64, ObjectId>) -> Option<ObjectId> {
     let ordinal = sexpr::child(value, "net")
         .and_then(|node| sexpr::argument(node, 0))
         .and_then(Value::as_i64)?;

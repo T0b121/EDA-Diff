@@ -7,11 +7,16 @@ small canonical-model summary. It never uploads user project data.
 
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
+interface ParsedFootprint {
+  pads: unknown[];
+}
+
 interface ParsedPcb {
-  footprints: unknown[];
+  footprints: ParsedFootprint[];
   tracks: unknown[];
   vias: unknown[];
   nets: unknown[];
+  board_outline: unknown[];
 }
 
 export function connectPcbImportPanel(worker: Worker): void {
@@ -64,11 +69,18 @@ function describeResult(response: CoreResponse, fileName: string): string {
   }
 
   const pcb = JSON.parse(response.json) as ParsedPcb;
+  const padCount = pcb.footprints.reduce(
+    (total, footprint) => total + footprint.pads.length,
+    0
+  );
+
   return [
     `${fileName}:`,
     `${pcb.footprints.length} footprints,`,
+    `${padCount} pads,`,
     `${pcb.tracks.length} tracks,`,
     `${pcb.vias.length} vias,`,
-    `${pcb.nets.length} nets`
+    `${pcb.nets.length} nets,`,
+    `${pcb.board_outline.length} board edges`
   ].join(" ");
 }

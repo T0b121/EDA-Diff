@@ -5,6 +5,8 @@ This module owns all KiCad-specific parsing and serialization. The rest of the
 application communicates through the generic FormatAdapter boundary.
 */
 
+mod outline;
+mod pad;
 mod pcb;
 mod sexpr;
 

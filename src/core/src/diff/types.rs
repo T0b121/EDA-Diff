@@ -17,6 +17,7 @@ pub enum ChangeKind {
 pub enum MatchMethod {
     ObjectId,
     Reference,
+    Number,
     Name,
 }
 

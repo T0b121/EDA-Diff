@@ -12,9 +12,15 @@ use crate::model::source::{SourceFormat, SourceRef};
 use super::sexpr;
 
 pub fn object_native_id(value: &Value) -> Option<String> {
-    sexpr::child_text(value, "uuid")
-        .or_else(|| sexpr::child_text(value, "tstamp"))
+    child_identifier(value, "uuid").or_else(|| child_identifier(value, "tstamp"))
+}
+
+fn child_identifier(value: &Value, name: &str) -> Option<String> {
+    let argument = sexpr::argument(sexpr::child(value, name)?, 0)?;
+
+    sexpr::text(argument)
         .map(str::to_owned)
+        .or_else(|| Some(argument.to_string()))
 }
 
 pub fn source_ref(path: &str, native_id: String) -> SourceRef {

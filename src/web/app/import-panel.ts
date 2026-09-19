@@ -6,6 +6,10 @@ compatible files, transfers them to the core worker, and renders diff results.
 */
 
 import { renderPcbComparison, type PcbComparison } from "../render/pcb-svg";
+import {
+  connectPcbViewControls,
+  resetPcbViewControls
+} from "../render/pcb-view";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 interface DiffSummary {
@@ -42,12 +46,17 @@ export function connectEdaComparePanel(worker: Worker): void {
   const status = document.querySelector<HTMLOutputElement>("#diff-status");
   const report = document.querySelector<HTMLElement>("#diff-report");
   const visual = document.querySelector<HTMLElement>("#pcb-visual");
+  const controls = document.querySelector<HTMLElement>("#pcb-controls");
 
-  if (!beforeInput || !afterInput || !button || !status || !report || !visual) {
+  if (
+    !beforeInput || !afterInput || !button || !status || !report ||
+    !visual || !controls
+  ) {
     return;
   }
 
   let requestId = 100;
+  connectPcbViewControls(visual);
 
   button.addEventListener("click", async () => {
     const beforeFile = beforeInput.files?.[0];
@@ -68,6 +77,7 @@ export function connectEdaComparePanel(worker: Worker): void {
     status.textContent = "Comparing files locally…";
     report.hidden = true;
     visual.hidden = true;
+    controls.hidden = true;
     visual.replaceChildren();
 
     const id = requestId++;
@@ -102,6 +112,8 @@ export function connectEdaComparePanel(worker: Worker): void {
         renderDiff(comparison.diff as DiffReport, status, report);
         renderPcbComparison(comparison, visual);
         visual.hidden = false;
+        controls.hidden = false;
+        resetPcbViewControls(visual);
         return;
       }
 

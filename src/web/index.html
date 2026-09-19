@@ -53,6 +53,13 @@ routing, workers, and EDA logic belong to TypeScript and Rust modules.
           <span class="legend-modified">Modified</span>
           <span class="legend-unchanged">Unchanged</span>
         </div>
+        <div id="pcb-controls" class="pcb-controls" hidden>
+          <button id="pcb-fit" type="button">Fit to board</button>
+          <button id="pcb-zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="pcb-zoom-out" type="button" aria-label="Zoom out">−</button>
+          <label><input id="pcb-show-before" type="checkbox" checked> Before</label>
+          <label><input id="pcb-show-after" type="checkbox" checked> After</label>
+        </div>
         <section id="pcb-visual" class="pcb-visual" hidden></section>
         <section id="diff-report" class="diff-report" hidden></section>
       </section>

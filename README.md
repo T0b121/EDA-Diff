@@ -24,6 +24,7 @@ validation.
 - Local `.kicad_pcb` and `.kicad_sch` semantic comparison in the Compare view.
 - Structured added/removed/modified/unchanged results with field-level changes.
 - Initial SVG PCB diff overlay for tracks, vias, pads, footprints, and board edges.
+- Interactive PCB viewport with pan, cursor-centered zoom, fit-to-board, and Before/After visibility controls.
 - Hash-based SPA routing compatible with static GitHub Pages.
 - Browser storage, file-source, and repository-provider boundaries.
 

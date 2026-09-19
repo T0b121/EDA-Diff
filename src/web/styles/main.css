@@ -182,3 +182,39 @@ p {
 .legend-unchanged::before {
   background: color-mix(in srgb, currentColor 45%, transparent);
 }
+
+.pcb-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.pcb-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pcb-visual {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.pcb-visual.is-panning {
+  cursor: grabbing;
+}
+
+.pcb-visual:not(.hide-after) .revision-before.change-unchanged {
+  display: none;
+}
+
+.pcb-visual.hide-before .revision-before {
+  display: none;
+}
+
+.pcb-visual.hide-after .revision-after {
+  display: none;
+}

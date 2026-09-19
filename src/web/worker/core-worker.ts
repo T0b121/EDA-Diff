@@ -6,7 +6,7 @@ so the browser UI remains responsive for large EDA projects.
 */
 
 import {
-  diffKiCadPcb,
+  compareKiCadPcb,
   diffKiCadSchematic,
   getCoreStatus,
   parseKiCadPcb,
@@ -44,25 +44,29 @@ self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
 
     const beforeSource = decode(request.beforeBytes);
     const afterSource = decode(request.afterBytes);
-    const json =
-      request.type === "diff-kicad-pcb"
-        ? await diffKiCadPcb(
-            beforeSource,
-            afterSource,
-            request.beforePath,
-            request.afterPath
-          )
-        : await diffKiCadSchematic(
-            beforeSource,
-            afterSource,
-            request.beforePath,
-            request.afterPath
-          );
+    if (request.type === "diff-kicad-pcb") {
+      respond({
+        id: request.id,
+        type: "pcb-comparison",
+        json: await compareKiCadPcb(
+          beforeSource,
+          afterSource,
+          request.beforePath,
+          request.afterPath
+        )
+      });
+      return;
+    }
 
     respond({
       id: request.id,
       type: "diff",
-      json
+      json: await diffKiCadSchematic(
+        beforeSource,
+        afterSource,
+        request.beforePath,
+        request.afterPath
+      )
     });
   } catch (error) {
     respond({

@@ -1,0 +1,9 @@
+# Repository ignore rules for generated and local-only files.
+#
+# Keep build output and common local editor or operating-system artifacts out of
+# version control. Add tool-specific entries here instead of creating competing
+# ignore files for the same responsibility.
+
+dist/
+.DS_Store
+Thumbs.db

@@ -25,12 +25,13 @@ validation.
 - Structured added/removed/modified/unchanged results with field-level changes.
 - Initial SVG PCB diff overlay for tracks, vias, pads, footprints, and board edges.
 - Interactive PCB viewport with pan, cursor-centered zoom, fit-to-board, and Before/After visibility controls.
+- Canonical PCB layer metadata with per-layer visibility controls in the visual diff.
 - Hash-based SPA routing compatible with static GitHub Pages.
 - Browser storage, file-source, and repository-provider boundaries.
 
 KiCad import and semantic comparison are intentionally incomplete at this stage.
 PCB zones, additional board graphics/rules, schematic pin connectivity, inferred
-nets, richer layer-aware rendering, and visual schematic rendering remain planned.
+nets, richer front/back presentation, and visual schematic rendering remain planned.
 
 ## Architecture
 

@@ -120,7 +120,6 @@ p {
 }
 
 .pcb-object {
-  vector-effect: non-scaling-stroke;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -157,4 +156,29 @@ p {
 
 .revision-before.change-removed {
   opacity: 0.8;
+}
+
+.diff-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.diff-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  vertical-align: -0.05rem;
+}
+
+.legend-added::before { background: #2ea043; }
+.legend-removed::before { background: #f85149; }
+.legend-modified::before { background: #d29922; }
+.legend-unchanged::before {
+  background: color-mix(in srgb, currentColor 45%, transparent);
 }

@@ -1,62 +1,84 @@
 /*
-Local KiCad file import panel controller.
+Local semantic comparison controller for KiCad files.
 
-This module transfers selected PCB or schematic bytes to the same core worker and
-presents a compact canonical-model summary. User files are never uploaded.
+This module reuses the existing compare-panel entry point. It validates two
+compatible files, transfers them to the core worker, and renders diff results.
 */
 
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
-interface ParsedFootprint {
-  pads: unknown[];
+interface DiffSummary {
+  added: number;
+  removed: number;
+  modified: number;
+  unchanged: number;
 }
 
-interface ParsedPcb {
-  footprints: ParsedFootprint[];
-  tracks: unknown[];
-  vias: unknown[];
-  nets: unknown[];
-  board_outline: unknown[];
+interface FieldChange {
+  field: string;
+  before: unknown;
+  after: unknown;
 }
 
-interface ParsedSchematic {
-  symbols: unknown[];
-  wires: unknown[];
-  junctions: unknown[];
-  labels: unknown[];
-  nets: unknown[];
+interface ObjectChange {
+  object_type: string;
+  display_name?: string;
+  kind: "added" | "removed" | "modified" | "unchanged";
+  fields: FieldChange[];
 }
 
-export function connectEdaImportPanel(worker: Worker): void {
-  const input = document.querySelector<HTMLInputElement>("#eda-file");
-  const result = document.querySelector<HTMLOutputElement>("#eda-result");
+interface DiffReport {
+  summary: DiffSummary;
+  changes: ObjectChange[];
+}
 
-  if (!input || !result) {
+type DiffRequestType = "diff-kicad-pcb" | "diff-kicad-schematic";
+
+export function connectEdaComparePanel(worker: Worker): void {
+  const beforeInput = document.querySelector<HTMLInputElement>("#before-file");
+  const afterInput = document.querySelector<HTMLInputElement>("#after-file");
+  const button = document.querySelector<HTMLButtonElement>("#compare-files");
+  const status = document.querySelector<HTMLOutputElement>("#diff-status");
+  const report = document.querySelector<HTMLElement>("#diff-report");
+
+  if (!beforeInput || !afterInput || !button || !status || !report) {
     return;
   }
 
   let requestId = 100;
 
-  input.addEventListener("change", async () => {
-    const file = input.files?.[0];
-    if (!file) {
+  button.addEventListener("click", async () => {
+    const beforeFile = beforeInput.files?.[0];
+    const afterFile = afterInput.files?.[0];
+
+    if (!beforeFile || !afterFile) {
+      status.textContent = "Select both files first.";
       return;
     }
 
-    const type = requestType(file.name);
+    const type = diffType(beforeFile.name, afterFile.name);
     if (!type) {
-      result.textContent = "Unsupported file type.";
+      status.textContent = "Both files must be the same supported KiCad type.";
+      report.hidden = true;
       return;
     }
+
+    status.textContent = "Comparing files locally…";
+    report.hidden = true;
 
     const id = requestId++;
-    const bytes = await file.arrayBuffer();
-    result.textContent = `Parsing ${file.name} locally…`;
+    const [beforeBytes, afterBytes] = await Promise.all([
+      beforeFile.arrayBuffer(),
+      afterFile.arrayBuffer()
+    ]);
+
     const request: CoreRequest = {
       id,
       type,
-      path: file.name,
-      bytes
+      beforePath: beforeFile.name,
+      afterPath: afterFile.name,
+      beforeBytes,
+      afterBytes
     };
 
     const listener = (event: MessageEvent<CoreResponse>): void => {
@@ -65,73 +87,89 @@ export function connectEdaImportPanel(worker: Worker): void {
       }
 
       worker.removeEventListener("message", listener);
-      result.textContent = describeResult(event.data, file.name);
+
+      if (event.data.type === "error") {
+        status.textContent = `Comparison failed: ${event.data.message}`;
+        return;
+      }
+
+      if (event.data.type !== "diff") {
+        status.textContent = "Unexpected response from the EDA core.";
+        return;
+      }
+
+      const result = JSON.parse(event.data.json) as DiffReport;
+      renderDiff(result, status, report);
     };
 
     worker.addEventListener("message", listener);
-    worker.postMessage(request, [bytes]);
+    worker.postMessage(request, [beforeBytes, afterBytes]);
   });
 }
 
-function requestType(
-  fileName: string
-): "parse-kicad-pcb" | "parse-kicad-schematic" | undefined {
-  if (fileName.endsWith(".kicad_pcb")) {
-    return "parse-kicad-pcb";
+function diffType(beforeName: string, afterName: string): DiffRequestType | undefined {
+  if (beforeName.endsWith(".kicad_pcb") && afterName.endsWith(".kicad_pcb")) {
+    return "diff-kicad-pcb";
   }
 
-  if (fileName.endsWith(".kicad_sch")) {
-    return "parse-kicad-schematic";
+  if (beforeName.endsWith(".kicad_sch") && afterName.endsWith(".kicad_sch")) {
+    return "diff-kicad-schematic";
   }
 
   return undefined;
 }
 
-function describeResult(response: CoreResponse, fileName: string): string {
-  if (response.type === "error") {
-    return `Import failed: ${response.message}`;
+function renderDiff(
+  diff: DiffReport,
+  status: HTMLOutputElement,
+  report: HTMLElement
+): void {
+  const { added, removed, modified, unchanged } = diff.summary;
+  status.textContent =
+    `${added} added, ${removed} removed, ${modified} modified, ` +
+    `${unchanged} unchanged`;
+
+  const visibleChanges = diff.changes.filter((change) => change.kind !== "unchanged");
+  report.replaceChildren();
+
+  if (visibleChanges.length === 0) {
+    report.textContent = "No semantic changes detected.";
+    report.hidden = false;
+    return;
   }
 
-  if (response.type === "pcb") {
-    return describePcb(JSON.parse(response.json) as ParsedPcb, fileName);
+  const list = document.createElement("ul");
+  list.className = "change-list";
+
+  for (const change of visibleChanges) {
+    list.append(renderChange(change));
   }
 
-  if (response.type === "schematic") {
-    return describeSchematic(
-      JSON.parse(response.json) as ParsedSchematic,
-      fileName
-    );
-  }
-
-  return `Unexpected response while importing ${fileName}.`;
+  report.append(list);
+  report.hidden = false;
 }
 
-function describePcb(pcb: ParsedPcb, fileName: string): string {
-  const padCount = pcb.footprints.reduce(
-    (total, footprint) => total + footprint.pads.length,
-    0
-  );
+function renderChange(change: ObjectChange): HTMLLIElement {
+  const item = document.createElement("li");
+  const title = document.createElement("strong");
+  title.textContent =
+    `${change.kind}: ${change.display_name ?? change.object_type}`;
+  item.append(title);
 
-  return [
-    `${fileName}:`,
-    `${pcb.footprints.length} footprints,`,
-    `${padCount} pads,`,
-    `${pcb.tracks.length} tracks,`,
-    `${pcb.vias.length} vias,`,
-    `${pcb.nets.length} nets,`,
-    `${pcb.board_outline.length} board edges`
-  ].join(" ");
+  if (change.fields.length > 0) {
+    const fields = document.createElement("ul");
+    for (const field of change.fields) {
+      const detail = document.createElement("li");
+      detail.textContent =
+        `${field.field}: ${formatValue(field.before)} → ${formatValue(field.after)}`;
+      fields.append(detail);
+    }
+    item.append(fields);
+  }
+
+  return item;
 }
 
-function describeSchematic(
-  schematic: ParsedSchematic,
-  fileName: string
-): string {
-  return [
-    `${fileName}:`,
-    `${schematic.symbols.length} symbols,`,
-    `${schematic.wires.length} wires,`,
-    `${schematic.junctions.length} junctions,`,
-    `${schematic.labels.length} labels`
-  ].join(" ");
+function formatValue(value: unknown): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
 }

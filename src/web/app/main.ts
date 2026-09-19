@@ -5,11 +5,13 @@ This module bootstraps routing and UI-to-worker communication. Parsing,
 repository access, storage, and EDA domain behavior stay in dedicated modules.
 */
 
+import { connectPcbImportPanel } from "./import-panel";
 import { watchRoute, type AppRoute } from "./router";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 const status = document.querySelector<HTMLElement>("#build-status");
 const description = document.querySelector<HTMLElement>("#view-description");
+const comparePanel = document.querySelector<HTMLElement>("#compare-panel");
 const coreWorker = new Worker(new URL("../worker/core-worker.ts", import.meta.url), {
   type: "module"
 });
@@ -24,7 +26,13 @@ watchRoute((route) => {
   if (description) {
     description.textContent = descriptions[route];
   }
+
+  if (comparePanel) {
+    comparePanel.hidden = route !== "compare";
+  }
 });
+
+connectPcbImportPanel(coreWorker);
 
 coreWorker.addEventListener("message", (event: MessageEvent<CoreResponse>) => {
   if (!status || event.data.id !== 1) {

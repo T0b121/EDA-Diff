@@ -24,7 +24,7 @@ validation.
 - Local `.kicad_pcb` and `.kicad_sch` semantic comparison in the Compare view.
 - Structured added/removed/modified/unchanged results with field-level changes.
 - Initial SVG PCB diff overlay for tracks, vias, pads, footprints, and board edges.
-- Initial SVG schematic diff for symbols, wires, junctions, and labels.
+- SVG schematic diff for embedded symbol graphics, pins, wires, junctions, and labels.
 - Interactive PCB viewport with pan, cursor-centered zoom, fit-to-board, and Before/After visibility controls.
 - Canonical PCB layer metadata with per-layer visibility controls in the visual diff.
 - Hash-based SPA routing compatible with static GitHub Pages.
@@ -32,8 +32,8 @@ validation.
 
 KiCad import and semantic comparison are intentionally incomplete at this stage.
 PCB zones, additional board graphics/rules, schematic pin connectivity, inferred
-nets, richer front/back presentation, full schematic library graphics/pins, and
-connectivity-aware schematic rendering remain planned.
+nets, richer front/back presentation, additional symbol graphic primitives/styles,
+and connectivity-aware schematic rendering remain planned.
 
 ## Architecture
 

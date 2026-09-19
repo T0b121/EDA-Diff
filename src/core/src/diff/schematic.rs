@@ -37,6 +37,8 @@ fn diff_symbols(before: &[Symbol], after: &[Symbol], changes: &mut Vec<ObjectCha
                 field("unit", &old.unit, &new.unit, &mut fields);
                 field("position", &old.position, &new.position, &mut fields);
                 field("rotation", &old.rotation, &new.rotation, &mut fields);
+                field("mirror-x", &old.mirror_x, &new.mirror_x, &mut fields);
+                field("mirror-y", &old.mirror_y, &new.mirror_y, &mut fields);
 
                 changes.push(ObjectChange::compared(
                     "schematic-symbol",

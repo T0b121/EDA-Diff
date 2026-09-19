@@ -1,0 +1,39 @@
+# Pull request validation for the EDA-Diff build.
+#
+# This workflow runs the same Rust tests and browser build used by releases, but
+# never deploys. It catches integration and type errors before changes reach main.
+
+name: Validate pull request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Install web dependencies
+        run: npm install
+
+      - name: Set up Rust WebAssembly target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --locked
+
+      - name: Test and build
+        run: bash scripts/build-pages.sh

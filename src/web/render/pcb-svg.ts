@@ -16,6 +16,7 @@ interface Pad {
   position: Point;
   rotation: Rotation;
   size: Size;
+  layers: string[];
 }
 
 interface Footprint {
@@ -23,6 +24,7 @@ interface Footprint {
   reference: string;
   position: Point;
   rotation: Rotation;
+  layer: string;
   pads: Pad[];
 }
 
@@ -31,19 +33,27 @@ interface Track {
   start: Point;
   end: Point;
   width_mm: number;
+  layer: string;
 }
 
 interface Via {
   id: string;
   position: Point;
   diameter_mm: number;
+  layers: string[];
 }
 
 type BoardEdge =
   | { kind: "line"; id: string; start: Point; end: Point }
   | { kind: "arc"; id: string; start: Point; mid: Point; end: Point };
 
+interface PcbLayer {
+  name: string;
+  kind: "copper" | "technical" | "user" | "other";
+}
+
 interface Pcb {
+  layers: PcbLayer[];
   footprints: Footprint[];
   tracks: Track[];
   vias: Via[];
@@ -124,7 +134,7 @@ function drawTrack(
   const line = element("line");
   setLine(line, track.start, track.end);
   line.setAttribute("stroke-width", String(Math.max(track.width_mm, 0.15)));
-  decorate(line, kind, revision);
+  decorate(line, kind, revision, [track.layer]);
   svg.append(line);
 }
 
@@ -142,7 +152,7 @@ function drawVia(
   circle.setAttribute("cx", String(via.position.x_mm));
   circle.setAttribute("cy", String(via.position.y_mm));
   circle.setAttribute("r", String(Math.max(via.diameter_mm / 2, 0.2)));
-  decorate(circle, kind, revision);
+  decorate(circle, kind, revision, via.layers);
   svg.append(circle);
 }
 
@@ -184,7 +194,7 @@ function drawPad(
     "transform",
     `rotate(${rotation} ${position.x_mm} ${position.y_mm})`
   );
-  decorate(shape, kind, revision);
+  decorate(shape, kind, revision, pad.layers.length > 0 ? pad.layers : [footprint.layer]);
   svg.append(shape);
 }
 
@@ -207,7 +217,7 @@ function drawEdge(
   );
   path.classList.add("pcb-outline");
   path.setAttribute("stroke-width", "0.2");
-  decorate(path, kind, revision);
+  decorate(path, kind, revision, ["Edge.Cuts"]);
   svg.append(path);
 }
 
@@ -234,9 +244,11 @@ function buildStatusMap(changes: ObjectChange[]): Map<string, ChangeKind> {
 function decorate(
   node: SVGElement,
   kind: ChangeKind,
-  revision: Revision
+  revision: Revision,
+  layers: string[]
 ): void {
   node.classList.add("pcb-object", `change-${kind}`, `revision-${revision}`);
+  node.dataset.layers = layers.join("|");
 }
 
 function setLine(line: SVGLineElement, start: Point, end: Point): void {

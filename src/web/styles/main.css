@@ -218,3 +218,35 @@ p {
 .pcb-visual.hide-after .revision-after {
   display: none;
 }
+
+.pcb-layer-controls {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 0.4rem;
+}
+
+.pcb-layer-actions,
+.pcb-layer-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.pcb-layer-list {
+  margin-top: 0.75rem;
+}
+
+.pcb-layer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pcb-layer-copper {
+  font-weight: 600;
+}
+
+.pcb-object.layer-hidden {
+  display: none;
+}

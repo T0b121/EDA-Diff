@@ -12,6 +12,11 @@ const BOARD: &str = r#"
 (kicad_pcb
   (version 20240108)
   (generator pcbnew)
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (44 "Edge.Cuts" user)
+  )
   (net 0 "")
   (net 1 "GND")
   (footprint "Resistor_SMD:R_0603"
@@ -66,6 +71,10 @@ fn imports_core_board_objects() {
         .parse_pcb(BOARD, "board.kicad_pcb")
         .expect("sample PCB should parse");
 
+    assert_eq!(pcb.layers.len(), 3);
+    assert_eq!(pcb.layers[0].name, "F.Cu");
+    assert_eq!(pcb.layers[1].name, "B.Cu");
+    assert_eq!(pcb.layers[2].name, "Edge.Cuts");
     assert_eq!(pcb.nets.len(), 2);
     assert_eq!(pcb.footprints.len(), 1);
     assert_eq!(pcb.tracks.len(), 1);
@@ -100,6 +109,7 @@ fn imports_core_board_objects() {
     let via = &pcb.vias[0];
     assert_eq!(via.diameter_mm, 0.8);
     assert_eq!(via.drill_mm, 0.4);
+    assert_eq!(via.layers, vec!["F.Cu", "B.Cu"]);
 }
 
 #[test]

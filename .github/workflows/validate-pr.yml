@@ -1,7 +1,7 @@
 # Pull request validation for the EDA-Diff build.
 #
 # This workflow runs the same Rust tests and browser build used by releases, but
-# never deploys. It catches integration and type errors before changes reach main.
+# never deploys. Ubuntu and Node are pinned so validation stays reproducible.
 
 name: Validate pull request
 
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out pull request
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "26"
 
       - name: Install web dependencies
         run: npm install

@@ -27,6 +27,16 @@ pub fn parse_kicad_pcb_json(source: &str, path: &str) -> Result<String, JsValue>
         .map_err(|error| JsValue::from_str(&format!("Failed to serialize PCB: {error}")))
 }
 
+#[wasm_bindgen]
+pub fn parse_kicad_schematic_json(source: &str, path: &str) -> Result<String, JsValue> {
+    let schematic = KiCadAdapter
+        .parse_schematic(source, path)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+
+    serde_json::to_string(&schematic)
+        .map_err(|error| JsValue::from_str(&format!("Failed to serialize schematic: {error}")))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

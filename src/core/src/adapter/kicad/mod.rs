@@ -10,6 +10,7 @@ mod outline;
 mod pad;
 mod pcb;
 mod schematic;
+mod symbol;
 mod sexpr;
 
 use crate::adapter::error::AdapterError;

@@ -67,6 +67,13 @@ static Pages hosting.
 Generated build output, Rust target files, Node dependencies, and generated WASM
 bindings are not committed.
 
+## Local toolchain
+
+Local development requires Node.js, Rust, the `wasm32-unknown-unknown` target,
+and `wasm-pack`. Install JavaScript dependencies once with `npm install`.
+The `npm run dev` command builds the Rust core first and then starts Vite;
+`npm run build` produces the complete static `dist/` artifact.
+
 ## Data boundaries
 
 Original project files or repositories remain the source of truth. Parsed EDA

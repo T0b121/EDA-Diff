@@ -47,6 +47,13 @@ routing, workers, and EDA logic belong to TypeScript and Rust modules.
 
         <button id="compare-files" type="button">Compare files</button>
         <output id="diff-status" class="result" aria-live="polite"></output>
+        <div class="diff-legend" aria-label="PCB diff legend">
+          <span class="legend-added">Added</span>
+          <span class="legend-removed">Removed</span>
+          <span class="legend-modified">Modified</span>
+          <span class="legend-unchanged">Unchanged</span>
+        </div>
+        <section id="pcb-visual" class="pcb-visual" hidden></section>
         <section id="diff-report" class="diff-report" hidden></section>
       </section>
 

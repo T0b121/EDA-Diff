@@ -6,6 +6,7 @@ merge logic, and validation. Browser-specific behavior must stay outside it.
 */
 
 pub mod adapter;
+pub mod compare;
 pub mod diff;
 pub mod model;
 
@@ -36,6 +37,25 @@ pub fn parse_kicad_schematic_json(source: &str, path: &str) -> Result<String, Js
 
     serde_json::to_string(&schematic)
         .map_err(|error| JsValue::from_str(&format!("Failed to serialize schematic: {error}")))
+}
+
+#[wasm_bindgen]
+pub fn compare_kicad_pcb_json(
+    before_source: &str,
+    after_source: &str,
+    before_path: &str,
+    after_path: &str,
+) -> Result<String, JsValue> {
+    let before = KiCadAdapter
+        .parse_pcb(before_source, before_path)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+    let after = KiCadAdapter
+        .parse_pcb(after_source, after_path)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+    let comparison = compare::PcbComparison::new(before, after);
+
+    serde_json::to_string(&comparison)
+        .map_err(|error| JsValue::from_str(&format!("Failed to serialize PCB comparison: {error}")))
 }
 
 #[wasm_bindgen]

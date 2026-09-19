@@ -5,6 +5,7 @@ This module reuses the existing compare-panel entry point. It validates two
 compatible files, transfers them to the core worker, and renders diff results.
 */
 
+import { renderPcbComparison, type PcbComparison } from "../render/pcb-svg";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 interface DiffSummary {
@@ -40,8 +41,9 @@ export function connectEdaComparePanel(worker: Worker): void {
   const button = document.querySelector<HTMLButtonElement>("#compare-files");
   const status = document.querySelector<HTMLOutputElement>("#diff-status");
   const report = document.querySelector<HTMLElement>("#diff-report");
+  const visual = document.querySelector<HTMLElement>("#pcb-visual");
 
-  if (!beforeInput || !afterInput || !button || !status || !report) {
+  if (!beforeInput || !afterInput || !button || !status || !report || !visual) {
     return;
   }
 
@@ -65,6 +67,8 @@ export function connectEdaComparePanel(worker: Worker): void {
 
     status.textContent = "Comparing files locally…";
     report.hidden = true;
+    visual.hidden = true;
+    visual.replaceChildren();
 
     const id = requestId++;
     const [beforeBytes, afterBytes] = await Promise.all([
@@ -93,13 +97,21 @@ export function connectEdaComparePanel(worker: Worker): void {
         return;
       }
 
-      if (event.data.type !== "diff") {
-        status.textContent = "Unexpected response from the EDA core.";
+      if (event.data.type === "pcb-comparison") {
+        const comparison = JSON.parse(event.data.json) as PcbComparison;
+        renderDiff(comparison.diff as DiffReport, status, report);
+        renderPcbComparison(comparison, visual);
+        visual.hidden = false;
         return;
       }
 
-      const result = JSON.parse(event.data.json) as DiffReport;
-      renderDiff(result, status, report);
+      if (event.data.type === "diff") {
+        const result = JSON.parse(event.data.json) as DiffReport;
+        renderDiff(result, status, report);
+        return;
+      }
+
+      status.textContent = "Unexpected response from the EDA core.";
     };
 
     worker.addEventListener("message", listener);

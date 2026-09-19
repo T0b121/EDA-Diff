@@ -1,10 +1,11 @@
 # Build script for the complete GitHub Pages artifact.
 #
-# This script builds the shared Rust core to WebAssembly, bundles the TypeScript
-# SPA with Vite, and then adds static assets to the generated dist/ directory.
+# This script tests the native Rust core, builds it to WebAssembly, bundles the
+# TypeScript SPA with Vite, and adds static assets to the generated dist/ output.
 
 set -eu
 
+cargo test --manifest-path src/core/Cargo.toml
 npm run build
 
 if [ -d assets ]; then
@@ -13,4 +14,4 @@ fi
 
 find dist -name '.gitkeep' -delete
 
-printf 'Built Rust/WASM and TypeScript GitHub Pages site in dist/\n'
+printf 'Tested core and built Rust/WASM + TypeScript site in dist/\n'

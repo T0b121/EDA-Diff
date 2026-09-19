@@ -11,6 +11,10 @@ import {
   resetPcbViewControls
 } from "../render/pcb-view";
 import { renderPcbLayerControls } from "../render/pcb-layers";
+import {
+  renderSchematicComparison,
+  type SchematicComparison
+} from "../render/schematic-svg";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 interface DiffSummary {
@@ -119,6 +123,16 @@ export function connectEdaComparePanel(worker: Worker): void {
         controls.hidden = false;
         resetPcbViewControls(visual);
         renderPcbLayerControls(comparison, visual, layerControls);
+        return;
+      }
+
+      if (event.data.type === "schematic-comparison") {
+        const comparison = JSON.parse(event.data.json) as SchematicComparison;
+        renderDiff(comparison.diff as DiffReport, status, report);
+        renderSchematicComparison(comparison, visual);
+        visual.hidden = false;
+        controls.hidden = false;
+        resetPcbViewControls(visual);
         return;
       }
 

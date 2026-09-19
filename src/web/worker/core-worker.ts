@@ -7,6 +7,7 @@ so the browser UI remains responsive for large EDA projects.
 
 import {
   compareKiCadPcb,
+  compareKiCadSchematic,
   diffKiCadSchematic,
   getCoreStatus,
   parseKiCadPcb,
@@ -60,8 +61,8 @@ self.addEventListener("message", async (event: MessageEvent<CoreRequest>) => {
 
     respond({
       id: request.id,
-      type: "diff",
-      json: await diffKiCadSchematic(
+      type: "schematic-comparison",
+      json: await compareKiCadSchematic(
         beforeSource,
         afterSource,
         request.beforePath,

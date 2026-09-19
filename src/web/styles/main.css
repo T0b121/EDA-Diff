@@ -250,3 +250,34 @@ p {
 .pcb-object.layer-hidden {
   display: none;
 }
+
+.schematic-wire {
+  fill: none;
+  stroke-width: 0.45;
+}
+
+.schematic-symbol rect {
+  fill: color-mix(in srgb, Canvas 92%, currentColor 8%);
+  stroke-width: 0.35;
+}
+
+.schematic-symbol text,
+.schematic-label {
+  stroke: none;
+  font-family: system-ui, sans-serif;
+  font-size: 1.8px;
+  paint-order: stroke;
+}
+
+.schematic-value {
+  font-size: 1.35px !important;
+  opacity: 0.8;
+}
+
+.schematic-label {
+  font-size: 1.6px;
+}
+
+.schematic-canvas .revision-before.change-modified {
+  stroke-dasharray: 1.2 0.8;
+}

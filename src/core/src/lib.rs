@@ -78,6 +78,25 @@ pub fn diff_kicad_pcb_json(
 }
 
 #[wasm_bindgen]
+pub fn compare_kicad_schematic_json(
+    before_source: &str,
+    after_source: &str,
+    before_path: &str,
+    after_path: &str,
+) -> Result<String, JsValue> {
+    let before = KiCadAdapter
+        .parse_schematic(before_source, before_path)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+    let after = KiCadAdapter
+        .parse_schematic(after_source, after_path)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+    let comparison = compare::SchematicComparison::new(before, after);
+
+    serde_json::to_string(&comparison)
+        .map_err(|error| JsValue::from_str(&format!("Failed to serialize schematic comparison: {error}")))
+}
+
+#[wasm_bindgen]
 pub fn diff_kicad_schematic_json(
     before_source: &str,
     after_source: &str,

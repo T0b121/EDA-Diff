@@ -147,7 +147,7 @@ fn diff_labels(before: &[Label], after: &[Label], changes: &mut Vec<ObjectChange
         before,
         after,
         |item| item.id.0.clone(),
-        |_| None,
+        |item| (!item.name.is_empty()).then(|| item.name.clone()),
         MatchMethod::Name,
     ) {
         match (matched.before, matched.after) {

@@ -20,11 +20,20 @@ routing, workers, and EDA logic belong to TypeScript and Rust modules.
       <p id="view-description">
         Browser-based schematic and PCB comparison with Git-aware workflows.
       </p>
+
       <nav class="navigation" aria-label="Application">
         <a href="#/">Home</a>
         <a href="#/compare">Compare</a>
         <a href="#/repository">Repository</a>
       </nav>
+
+      <section id="compare-panel" class="panel" hidden>
+        <h2>KiCad PCB import test</h2>
+        <p>Select a <code>.kicad_pcb</code> file. It is parsed locally in your browser.</p>
+        <input id="pcb-file" type="file" accept=".kicad_pcb">
+        <output id="pcb-result" class="result" aria-live="polite"></output>
+      </section>
+
       <p id="build-status" class="status">Loading application…</p>
     </main>
 

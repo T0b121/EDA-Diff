@@ -22,7 +22,7 @@ body {
 }
 
 .shell {
-  width: min(760px, calc(100% - 2rem));
+  width: min(1180px, calc(100% - 2rem));
   padding: 2rem;
 }
 
@@ -102,4 +102,59 @@ p {
   .file-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.pcb-visual {
+  margin-top: 1rem;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, Canvas 94%, currentColor 6%);
+}
+
+.pcb-canvas {
+  display: block;
+  width: 100%;
+  height: min(65vh, 720px);
+}
+
+.pcb-object {
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pcb-outline,
+.pcb-object:not(ellipse):not(rect):not(circle) {
+  fill: none;
+}
+
+.change-unchanged {
+  stroke: color-mix(in srgb, currentColor 45%, transparent);
+  fill: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.change-added {
+  stroke: #2ea043;
+  fill: color-mix(in srgb, #2ea043 45%, transparent);
+}
+
+.change-removed {
+  stroke: #f85149;
+  fill: color-mix(in srgb, #f85149 35%, transparent);
+}
+
+.change-modified {
+  stroke: #d29922;
+  fill: color-mix(in srgb, #d29922 35%, transparent);
+}
+
+.revision-before.change-modified {
+  stroke-dasharray: 3 2;
+  opacity: 0.65;
+}
+
+.revision-before.change-removed {
+  opacity: 0.8;
 }

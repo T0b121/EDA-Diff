@@ -281,3 +281,35 @@ p {
 .schematic-canvas .revision-before.change-modified {
   stroke-dasharray: 1.2 0.8;
 }
+
+.symbol-graphic,
+.schematic-pin,
+.schematic-pin-decoration {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.symbol-fill-background {
+  fill: Canvas;
+}
+
+.schematic-pin {
+  fill: none;
+  stroke-width: 0.3;
+}
+
+.schematic-pin-decoration {
+  stroke-width: 0.3;
+}
+
+.schematic-pin-number,
+.schematic-reference,
+.schematic-value {
+  stroke: none;
+  text-anchor: middle;
+  font-size: 1.35px;
+}
+
+.schematic-reference {
+  font-weight: 600;
+}

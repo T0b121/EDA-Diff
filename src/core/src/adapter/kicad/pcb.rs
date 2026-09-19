@@ -12,8 +12,7 @@ use lexpr::Value;
 use crate::adapter::error::AdapterError;
 use crate::model::common::{ObjectId, Rotation};
 use crate::model::pcb::{Footprint, Net, Pcb, Track, Via};
-use crate::model::source::{SourceFormat, SourceRef};
-
+use super::native::{object_native_id, source_ref};
 use super::sexpr;
 
 pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
@@ -65,8 +64,7 @@ fn parse_footprint(
     net_ids: &HashMap<i64, ObjectId>,
 ) -> Result<Footprint, AdapterError> {
     let native_id = object_native_id(value).unwrap_or_else(|| "unknown".to_owned());
-    let mut source = SourceRef::new(SourceFormat::KiCad, path);
-    source.native_id = Some(native_id.clone());
+    let source = source_ref(path, native_id.clone());
 
     let at = sexpr::child(value, "at");
     let position = sexpr::required_point(value, "at")?;
@@ -131,18 +129,6 @@ fn property(value: &Value, name: &str) -> Option<String> {
             .then(|| sexpr::argument(node, 1).and_then(sexpr::text).map(str::to_owned))
             .flatten()
     })
-}
-
-pub(super) fn object_native_id(value: &Value) -> Option<String> {
-    sexpr::child_text(value, "uuid")
-        .or_else(|| sexpr::child_text(value, "tstamp"))
-        .map(str::to_owned)
-}
-
-pub(super) fn source_ref(path: &str, native_id: String) -> SourceRef {
-    let mut source = SourceRef::new(SourceFormat::KiCad, path);
-    source.native_id = Some(native_id);
-    source
 }
 
 pub(super) fn net_reference(value: &Value, net_ids: &HashMap<i64, ObjectId>) -> Option<ObjectId> {

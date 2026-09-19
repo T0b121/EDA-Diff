@@ -14,7 +14,8 @@ use crate::model::common::{ObjectId, Rotation, Size};
 use crate::model::pcb::Pad;
 
 use super::sexpr;
-use super::pcb::{net_reference, object_native_id, source_ref};
+use super::native::{object_native_id, source_ref};
+use super::pcb::net_reference;
 
 pub fn parse(
     value: &Value,

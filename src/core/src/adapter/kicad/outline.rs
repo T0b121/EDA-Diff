@@ -12,7 +12,7 @@ use crate::model::common::ObjectId;
 use crate::model::pcb::BoardEdge;
 
 use super::sexpr;
-use super::pcb::{object_native_id, source_ref};
+use super::native::{object_native_id, source_ref};
 
 pub fn parse(root: &Value, path: &str) -> Result<Vec<BoardEdge>, AdapterError> {
     let mut edges = Vec::new();

@@ -6,6 +6,7 @@ call this wrapper instead of importing generated WebAssembly bindings directly.
 */
 
 import initCore, {
+  compare_kicad_pcb_json,
   core_status,
   diff_kicad_pcb_json,
   diff_kicad_schematic_json,
@@ -36,6 +37,21 @@ export async function parseKiCadSchematic(
 ): Promise<string> {
   await initializeCore();
   return parse_kicad_schematic_json(source, path);
+}
+
+export async function compareKiCadPcb(
+  beforeSource: string,
+  afterSource: string,
+  beforePath: string,
+  afterPath: string
+): Promise<string> {
+  await initializeCore();
+  return compare_kicad_pcb_json(
+    beforeSource,
+    afterSource,
+    beforePath,
+    afterPath
+  );
 }
 
 export async function diffKiCadPcb(

@@ -12,7 +12,7 @@ use lexpr::Value;
 use crate::adapter::error::AdapterError;
 use crate::model::common::{ObjectId, Rotation};
 use crate::model::pcb::{Footprint, Net, Pcb, Track, Via};
-use super::native::{object_native_id, source_ref};
+use super::native::{object_native_id, property, source_ref};
 use super::sexpr;
 
 pub fn parse(source: &str, path: &str) -> Result<Pcb, AdapterError> {
@@ -120,14 +120,6 @@ fn parse_via(
         drill_mm: sexpr::child_number(value, "drill").unwrap_or(0.0),
         net_id: net_reference(value, net_ids),
         source: source_ref(path, native_id),
-    })
-}
-
-fn property(value: &Value, name: &str) -> Option<String> {
-    sexpr::children(value, "property").find_map(|node| {
-        (sexpr::argument(node, 0).and_then(sexpr::text) == Some(name))
-            .then(|| sexpr::argument(node, 1).and_then(sexpr::text).map(str::to_owned))
-            .flatten()
     })
 }
 

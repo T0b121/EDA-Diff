@@ -15,8 +15,17 @@ TypeScript, HTML, and CSS provide the browser interface while a shared Rust core
 is compiled to WebAssembly for EDA parsing, semantic comparison, merging, and
 validation.
 
-KiCad is the first planned format. Additional formats use adapters into the same
-canonical EDA model instead of creating format-specific comparison engines.
+## Current capabilities
+
+- Rust/WASM core running through a Web Worker.
+- Canonical, format-independent project, schematic, and PCB data structures.
+- Initial KiCad PCB adapter for nets, footprints, straight tracks, and vias.
+- Local `.kicad_pcb` import test in the Compare view.
+- Hash-based SPA routing compatible with static GitHub Pages.
+- Browser storage, file-source, and repository-provider boundaries.
+
+KiCad PCB import is intentionally incomplete at this stage. Pads, zones, graphic
+items, board outlines, rules, and schematic parsing are planned additions.
 
 ## Architecture
 
@@ -29,5 +38,5 @@ canonical EDA model instead of creating format-specific comparison engines.
 - **Files/Git:** browser file sources and repository providers are isolated behind
   interfaces so local files, GitHub, and later providers can share the same UI.
 
-EDA project content is intended to be processed locally in the browser by
-default rather than uploaded to an EDA-Diff server.
+EDA project content is processed locally in the browser by default rather than
+uploaded to an EDA-Diff server.

@@ -1,60 +1,21 @@
 /*
 SVG renderer for canonical schematic comparisons.
 
-The renderer consumes only format-independent schematic objects. Until the
-canonical model contains full library graphics and pins, symbols are represented
-by neutral boxes annotated with their reference and value.
+This module renders sheet-level geometry and delegates placed symbol bodies to
+the canonical symbol renderer. Native KiCad syntax must never reach this layer.
 */
 
-interface Point { x_mm: number; y_mm: number }
-interface Rotation { degrees: number }
+import type {
+  ChangeKind,
+  ObjectChange,
+  Point,
+  Revision,
+  Schematic,
+  SchematicComparison
+} from "./schematic-model";
+import { drawSchematicSymbol } from "./schematic-symbol";
 
-interface SymbolObject {
-  id: string;
-  reference: string;
-  value: string;
-  position: Point;
-  rotation: Rotation;
-}
-
-interface Wire {
-  id: string;
-  points: Point[];
-}
-
-interface Junction {
-  id: string;
-  position: Point;
-}
-
-interface Label {
-  id: string;
-  name: string;
-  position: Point;
-  rotation: Rotation;
-}
-
-interface Schematic {
-  symbols: SymbolObject[];
-  wires: Wire[];
-  junctions: Junction[];
-  labels: Label[];
-}
-
-interface ObjectChange {
-  before_id?: string;
-  after_id?: string;
-  kind: "added" | "removed" | "modified" | "unchanged";
-}
-
-export interface SchematicComparison {
-  before: Schematic;
-  after: Schematic;
-  diff: { changes: ObjectChange[] };
-}
-
-type ChangeKind = ObjectChange["kind"];
-type Revision = "before" | "after";
+export type { SchematicComparison } from "./schematic-model";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -67,7 +28,8 @@ export function renderSchematicComparison(
   const svg = element("svg");
   svg.classList.add("pcb-canvas", "schematic-canvas");
 
-  const fitViewBox = `${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`;
+  const fitViewBox =
+    bounds.minX + " " + bounds.minY + " " + bounds.width + " " + bounds.height;
   svg.setAttribute("viewBox", fitViewBox);
   svg.dataset.fitViewBox = fitViewBox;
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -76,7 +38,6 @@ export function renderSchematicComparison(
 
   drawRevision(svg, comparison.before, "before", status);
   drawRevision(svg, comparison.after, "after", status);
-
   container.replaceChildren(svg);
 }
 
@@ -90,7 +51,7 @@ function drawRevision(
     const polyline = element("polyline");
     polyline.setAttribute(
       "points",
-      wire.points.map((point) => `${point.x_mm},${point.y_mm}`).join(" ")
+      wire.points.map((point) => point.x_mm + "," + point.y_mm).join(" ")
     );
     polyline.classList.add("schematic-wire");
     decorate(polyline, status.get(wire.id) ?? "unchanged", revision);
@@ -107,7 +68,13 @@ function drawRevision(
   }
 
   for (const symbol of schematic.symbols) {
-    drawSymbol(svg, symbol, revision, status.get(symbol.id) ?? "unchanged");
+    drawSchematicSymbol(
+      svg,
+      symbol,
+      schematic.symbol_definitions,
+      revision,
+      status.get(symbol.id) ?? "unchanged"
+    );
   }
 
   for (const label of schematic.labels) {
@@ -116,7 +83,8 @@ function drawRevision(
     text.setAttribute("y", String(label.position.y_mm));
     text.setAttribute(
       "transform",
-      `rotate(${label.rotation.degrees} ${label.position.x_mm} ${label.position.y_mm})`
+      "rotate(" + label.rotation.degrees + " " +
+        label.position.x_mm + " " + label.position.y_mm + ")"
     );
     text.classList.add("schematic-label");
     text.textContent = label.name;
@@ -125,52 +93,17 @@ function drawRevision(
   }
 }
 
-function drawSymbol(
-  svg: SVGSVGElement,
-  symbol: SymbolObject,
-  revision: Revision,
-  kind: ChangeKind
-): void {
-  const group = element("g");
-  group.setAttribute(
-    "transform",
-    `translate(${symbol.position.x_mm} ${symbol.position.y_mm}) rotate(${symbol.rotation.degrees})`
-  );
-  group.classList.add("schematic-symbol");
-
-  const body = element("rect");
-  body.setAttribute("x", "-5");
-  body.setAttribute("y", "-3");
-  body.setAttribute("width", "10");
-  body.setAttribute("height", "6");
-  body.setAttribute("rx", "0.5");
-  decorate(body, kind, revision);
-
-  const reference = element("text");
-  reference.setAttribute("x", "0");
-  reference.setAttribute("y", "-0.4");
-  reference.setAttribute("text-anchor", "middle");
-  reference.textContent = symbol.reference || "?";
-  decorate(reference, kind, revision);
-
-  const value = element("text");
-  value.setAttribute("x", "0");
-  value.setAttribute("y", "1.8");
-  value.setAttribute("text-anchor", "middle");
-  value.classList.add("schematic-value");
-  value.textContent = symbol.value;
-  decorate(value, kind, revision);
-
-  group.append(body, reference, value);
-  svg.append(group);
-}
-
 function decorate(
   node: SVGElement,
   kind: ChangeKind,
   revision: Revision
 ): void {
-  node.classList.add("pcb-object", "schematic-object", `change-${kind}`, `revision-${revision}`);
+  node.classList.add(
+    "pcb-object",
+    "schematic-object",
+    "change-" + kind,
+    "revision-" + revision
+  );
 }
 
 function buildStatusMap(changes: ObjectChange[]): Map<string, ChangeKind> {

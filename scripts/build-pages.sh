@@ -1,15 +1,11 @@
-# Build script for the GitHub Pages artifact.
+# Build script for the complete GitHub Pages artifact.
 #
-# This script assembles the browser-ready site in dist/. Keep deployment logic
-# out of here; future language-specific compilers may feed their generated web
-# output into dist/ while GitHub Actions remains responsible for publishing it.
+# This script builds the shared Rust core to WebAssembly, bundles the TypeScript
+# SPA with Vite, and then adds static assets to the generated dist/ directory.
 
 set -eu
 
-rm -rf dist
-mkdir -p dist
-
-cp -R src/. dist/
+npm run build
 
 if [ -d assets ]; then
   cp -R assets dist/assets
@@ -17,4 +13,4 @@ fi
 
 find dist -name '.gitkeep' -delete
 
-printf 'Built GitHub Pages site in dist/\n'
+printf 'Built Rust/WASM and TypeScript GitHub Pages site in dist/\n'

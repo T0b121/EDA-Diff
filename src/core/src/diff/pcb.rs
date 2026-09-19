@@ -93,8 +93,8 @@ fn diff_pads(before: &Footprint, after: &Footprint, changes: &mut Vec<ObjectChan
         &before.pads,
         &after.pads,
         |item| item.id.0.clone(),
-        |_| None,
-        MatchMethod::Reference,
+        |item| (!item.number.is_empty()).then(|| item.number.clone()),
+        MatchMethod::Number,
     ) {
         match (matched.before, matched.after) {
             (Some(before_index), Some(after_index)) => {

@@ -57,10 +57,12 @@ fn parse_layers(root: &Value) -> Vec<PcbLayer> {
         .flatten()
         .skip(1)
         .filter_map(|node| {
-            let name = sexpr::argument(node, 1)
+            let mut values = node.list_iter()?;
+            values.next()?;
+            let name = values.next()
                 .and_then(sexpr::text)?
                 .to_owned();
-            let native_kind = sexpr::argument(node, 2)
+            let native_kind = values.next()
                 .and_then(sexpr::text)
                 .unwrap_or("");
 

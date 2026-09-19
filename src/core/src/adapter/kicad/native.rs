@@ -22,3 +22,11 @@ pub fn source_ref(path: &str, native_id: String) -> SourceRef {
     source.native_id = Some(native_id);
     source
 }
+
+pub fn property(value: &Value, name: &str) -> Option<String> {
+    sexpr::children(value, "property").find_map(|node| {
+        (sexpr::argument(node, 0).and_then(sexpr::text) == Some(name))
+            .then(|| sexpr::argument(node, 1).and_then(sexpr::text).map(str::to_owned))
+            .flatten()
+    })
+}

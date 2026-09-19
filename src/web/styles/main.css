@@ -1,9 +1,8 @@
 /*
 Main stylesheet for the EDA-Diff browser application.
 
-Keep shared page-level presentation here while component-specific styles can be
-split out later when the interface grows. The initial rules provide a readable
-baseline without introducing a UI framework.
+Keep shared page-level presentation here. Component-specific styles may move to
+their owning modules once the interface grows beyond this initial shell.
 */
 
 :root {
@@ -40,4 +39,14 @@ h1 {
 
 p {
   line-height: 1.6;
+}
+
+.navigation {
+  display: flex;
+  gap: 1rem;
+  margin-block: 1.5rem;
+}
+
+.navigation a {
+  color: inherit;
 }

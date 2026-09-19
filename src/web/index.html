@@ -28,13 +28,26 @@ routing, workers, and EDA logic belong to TypeScript and Rust modules.
       </nav>
 
       <section id="compare-panel" class="panel" hidden>
-        <h2>KiCad import test</h2>
+        <h2>Semantic KiCad diff</h2>
         <p>
-          Select a <code>.kicad_pcb</code> or <code>.kicad_sch</code> file.
-          It is parsed locally in your browser.
+          Select two files of the same type. Both files are processed locally
+          in your browser and are never uploaded.
         </p>
-        <input id="eda-file" type="file" accept=".kicad_pcb,.kicad_sch">
-        <output id="eda-result" class="result" aria-live="polite"></output>
+
+        <div class="file-grid">
+          <label>
+            <span>Before</span>
+            <input id="before-file" type="file" accept=".kicad_pcb,.kicad_sch">
+          </label>
+          <label>
+            <span>After</span>
+            <input id="after-file" type="file" accept=".kicad_pcb,.kicad_sch">
+          </label>
+        </div>
+
+        <button id="compare-files" type="button">Compare files</button>
+        <output id="diff-status" class="result" aria-live="polite"></output>
+        <section id="diff-report" class="diff-report" hidden></section>
       </section>
 
       <p id="build-status" class="status">Loading application…</p>

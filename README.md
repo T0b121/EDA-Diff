@@ -23,12 +23,13 @@ validation.
 - Initial KiCad schematic adapter for symbols, wires, junctions, and labels.
 - Local `.kicad_pcb` and `.kicad_sch` semantic comparison in the Compare view.
 - Structured added/removed/modified/unchanged results with field-level changes.
+- Initial SVG PCB diff overlay for tracks, vias, pads, footprints, and board edges.
 - Hash-based SPA routing compatible with static GitHub Pages.
 - Browser storage, file-source, and repository-provider boundaries.
 
 KiCad import and semantic comparison are intentionally incomplete at this stage.
 PCB zones, additional board graphics/rules, schematic pin connectivity, inferred
-nets, and visual rendering remain planned.
+nets, richer layer-aware rendering, and visual schematic rendering remain planned.
 
 ## Architecture
 

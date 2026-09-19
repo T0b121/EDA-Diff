@@ -8,8 +8,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.config.ts",
     "build:core": "wasm-pack build src/core --target web --out-dir ../web/generated/core --release",
+    "dev": "npm run build:core && vite --config vite.config.ts",
     "build:web": "tsc --noEmit && vite build --config vite.config.ts",
     "build": "npm run build:core && npm run build:web",
     "preview": "vite preview --config vite.config.ts"

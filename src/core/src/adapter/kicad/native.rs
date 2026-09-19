@@ -16,11 +16,29 @@ pub fn object_native_id(value: &Value) -> Option<String> {
 }
 
 fn child_identifier(value: &Value, name: &str) -> Option<String> {
-    let argument = sexpr::argument(sexpr::child(value, name)?, 0)?;
+    let node = sexpr::child(value, name)?;
+    let mut parts = node.list_iter()?.skip(1).peekable();
 
-    sexpr::text(argument)
+    let first = parts.next()?;
+    if parts.peek().is_none() {
+        return Some(
+            sexpr::text(first)
+                .map(str::to_owned)
+                .unwrap_or_else(|| first.to_string()),
+        );
+    }
+
+    let mut identifier = scalar_text(first);
+    for part in parts {
+        identifier.push_str(&scalar_text(part));
+    }
+    Some(identifier)
+}
+
+fn scalar_text(value: &Value) -> String {
+    sexpr::text(value)
         .map(str::to_owned)
-        .or_else(|| Some(argument.to_string()))
+        .unwrap_or_else(|| value.to_string())
 }
 
 pub fn source_ref(path: &str, native_id: String) -> SourceRef {

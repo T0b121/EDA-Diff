@@ -2,8 +2,7 @@
 Development and repository workflow for EDA-Diff.
 
 This document defines how changes are structured, reviewed, committed, merged,
-and released. It is intentionally concise so contributors can understand the
-project rules without searching through unrelated documentation.
+built, and released, plus the architectural boundaries contributors must keep.
 -->
 
 # Development workflow
@@ -22,60 +21,66 @@ create a branch before an initial commit exists.
 ## Commits and subtasks
 
 Split a task into small, understandable subtasks and create one commit for each
-subtask.
+subtask. A subtask should usually touch about one to three files, contain roughly
+50 to 100 changed lines, and stay below about 200 changed lines where practical.
 
-As a guideline, a subtask should usually:
-
-- touch about one to three files;
-- contain roughly 50 to 100 changed lines;
-- stay below about 200 changed lines where practical;
-- represent one logical change that can be understood on its own.
-
-These are guidelines, not artificial limits. A one-line change can be a complete
-subtask, while tightly coupled work may reasonably require more files or lines.
+These are guidelines rather than artificial limits. A one-line change can be a
+complete subtask, while tightly coupled work may reasonably require more.
 
 ## Reuse before adding
 
 Before adding a new file, helper, abstraction, parser, or model:
 
 1. inspect the existing implementation;
-2. reuse or extend an existing component when it already owns the responsibility;
-3. add a new abstraction only when the existing design cannot represent the need.
+2. reuse or extend an existing component when it owns the responsibility;
+3. add an abstraction only when the current design cannot represent the need.
 
-Format-specific code must adapt into the shared EDA model instead of creating a
-second internal EDA representation. For example, an Eagle adapter should convert
-between Eagle data and the common model used by the rest of EDA-Diff.
+Format-specific code converts to and from the shared EDA model. It must not
+introduce a second internal EDA representation or a parallel diff engine.
 
 ## File headers
 
-Source, configuration, workflow, and documentation files should start with a
-short multi-line comment describing:
+Source, configuration, workflow, and documentation files start with a short
+multi-line comment explaining their responsibility and important boundaries.
+The header should identify the file quickly without duplicating full docs.
 
-- what the file is responsible for;
-- what belongs in the file;
-- important boundaries when they are not obvious from the filename.
+## Application architecture
 
-The header should help identify the file immediately without becoming a second
-full documentation page.
+The deployed product is a static, local-first single-page application:
 
-## Repository layout
+- `src/web/`: HTML, CSS, TypeScript, UI, routing, browser APIs, providers.
+- `src/core/`: Rust EDA domain logic reusable as native code and WebAssembly.
+- `src/web/worker/`: bridge that keeps expensive Rust/WASM work off the UI thread.
+- `src/web/storage/`: persistence boundaries; small preferences may use
+  localStorage while large data is reserved for IndexedDB/OPFS implementations.
+- `src/web/files/`: local project source adapters.
+- `src/web/git/`: repository-provider contracts and Git-host integrations.
+- `assets/`: static assets grouped by type.
+- `scripts/`: build/development automation.
+- `.github/workflows/`: GitHub Actions workflows.
 
-- `src/` contains application and program source code.
-- `assets/` contains static project assets, grouped by asset type.
-- `scripts/` contains project automation used by builds or development.
-- `.github/workflows/` contains GitHub Actions workflows.
+GitHub Pages provides no EDA-Diff application server. Do not design features that
+require server-side sessions, private secrets embedded in the client, or server
+filesystem state. Hash routing is used so direct SPA navigation remains valid on
+static Pages hosting.
 
-Generated build output is not source code and should not be committed unless a
-future task explicitly requires it.
+Generated build output, Rust target files, Node dependencies, and generated WASM
+bindings are not committed.
+
+## Data boundaries
+
+Original project files or repositories remain the source of truth. Parsed EDA
+models and derived comparison data are caches and may be regenerated.
+
+Browser persistence must not be treated as the only durable copy of user data.
+Sensitive credentials must not be persisted in URLs, source files, or build
+artifacts.
 
 ## Releases and GitHub Pages
 
-Publishing is tag-driven.
+Publishing is tag-driven. A tag starts the Pages workflow, but deployment
+continues only if the tagged commit is contained in `main`. Ordinary merges do
+not create releases.
 
-A tag triggers the Pages workflow, but deployment proceeds only if the tagged
-commit is contained in `main`. This keeps development branches publish-safe and
-allows multiple merges to happen without creating a version tag.
-
-The web build produces a `dist/` directory. Future compilers such as
-Emscripten may place WebAssembly and generated JavaScript into that directory
-without changing the Pages deployment model.
+The build compiles the Rust core to WebAssembly, bundles the TypeScript SPA with
+Vite, and produces `dist/`. GitHub Pages deploys only that static artifact.

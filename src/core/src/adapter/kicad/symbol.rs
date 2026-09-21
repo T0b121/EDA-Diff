@@ -8,7 +8,7 @@ drawing primitives, pin metadata, stroke width, and fill mode stay isolated here
 
 use lexpr::Value;
 
-use crate::model::common::{Point, Rotation};
+use crate::model::common::Rotation;
 use crate::model::schematic::{
     SymbolDefinition, SymbolFill, SymbolGraphic, SymbolPin, SymbolUnit,
 };

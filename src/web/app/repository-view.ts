@@ -18,7 +18,7 @@ export function connectRepositoryView(container: HTMLElement): void {
   load.type = "button";
   load.textContent = "Load GitHub repository";
   const list = document.createElement("ol");
-  list.className = "repository-commits";
+  list.className = "repository-commits repository-graph";
   container.append(load, status, list);
 
   load.addEventListener("click", async () => {
@@ -61,6 +61,10 @@ function renderCommits(
 
   for (const commit of commits) {
     const item = document.createElement("li");
+    item.className = "repository-commit";
+    const graph = document.createElement("span");
+    graph.className = "commit-graph-node";
+    graph.setAttribute("aria-hidden", "true");
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = commit.shortId + " — " + commit.message;
@@ -75,7 +79,7 @@ function renderCommits(
       first = undefined;
       await chooseFile(provider, older, commit, status);
     });
-    item.append(button);
+    item.append(graph, button);
     list.append(item);
   }
 }

@@ -326,3 +326,13 @@ p {
   width: 100%;
   text-align: left;
 }
+
+.repository-files {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.repository-files button {
+  width: 100%;
+  text-align: left;
+}

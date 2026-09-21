@@ -336,3 +336,33 @@ p {
   width: 100%;
   text-align: left;
 }
+
+.repository-graph {
+  list-style: none;
+  padding-left: 1.5rem;
+}
+.repository-commit {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.8rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 2rem;
+}
+.commit-graph-node {
+  position: relative;
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+.commit-graph-node::after {
+  content: "";
+  position: absolute;
+  top: 0.65rem;
+  left: 0.15rem;
+  width: 2px;
+  height: 1.35rem;
+  background: currentColor;
+  opacity: 0.35;
+}

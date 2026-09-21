@@ -17,4 +17,8 @@ export class LocalRepositoryProvider implements RepositoryProvider {
   async readFile(_commitId: string, _path: string): Promise<ArrayBuffer | undefined> {
     throw new Error("Local Git repository access is not implemented yet.");
   }
+
+  async listFiles(_commitId: string, _path?: string): Promise<string[]> {
+    throw new Error("Local Git repository access is not implemented yet.");
+  }
 }

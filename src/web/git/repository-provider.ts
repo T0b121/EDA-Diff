@@ -7,14 +7,21 @@ GitHub, a local Git implementation, or another hosting service.
 
 export interface RepositoryCommit {
   id: string;
+  shortId: string;
   parents: string[];
   message: string;
   authorName?: string;
   authoredAt?: string;
 }
 
+export interface RepositoryFile {
+  path: string;
+  bytes: ArrayBuffer;
+}
+
 export interface RepositoryProvider {
   readonly label: string;
   listCommits(limit?: number): Promise<RepositoryCommit[]>;
   readFile(commitId: string, path: string): Promise<ArrayBuffer | undefined>;
+  listFiles(commitId: string, path?: string): Promise<string[]>;
 }

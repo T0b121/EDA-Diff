@@ -1,15 +1,15 @@
-# Tag-driven GitHub Pages build and deployment workflow.
+# Main-driven GitHub Pages build and deployment workflow.
 #
-# This workflow publishes only tags whose target commit is contained in main.
+# Every change merged into main is built and published as the current Pages site.
 # It uses pinned Ubuntu runners, Node 26, Rust/WASM, and a Node-24 artifact action
 # to build and deploy the static Pages artifact without deprecated runtimes.
 
-name: Publish tagged main commit
+name: Publish main
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -24,8 +24,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    outputs:
-      eligible: ${{ steps.main-check.outputs.eligible }}
 
     steps:
       - name: Check out tagged revision
@@ -33,23 +31,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch main
-        run: git fetch --no-tags origin main
-
-      - name: Check whether tag belongs to main
-        id: main-check
-        shell: bash
-        run: |
-          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "eligible=true" >> "$GITHUB_OUTPUT"
-            echo "Tag commit is contained in main."
-          else
-            echo "eligible=false" >> "$GITHUB_OUTPUT"
-            echo "Tag commit is not contained in main; publication is skipped."
-          fi
-
       - name: Set up Node.js
-        if: steps.main-check.outputs.eligible == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: "26"
@@ -97,7 +79,6 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    if: needs.build.outputs.eligible == 'true'
     needs: build
     runs-on: ubuntu-24.04
 

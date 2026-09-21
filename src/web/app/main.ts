@@ -6,12 +6,14 @@ repository access, storage, and EDA domain behavior stay in dedicated modules.
 */
 
 import { connectEdaComparePanel } from "./import-panel";
+import { connectRepositoryView, type RepositorySelection } from "./repository-view";
 import { watchRoute, type AppRoute } from "./router";
 import type { CoreRequest, CoreResponse } from "../worker/messages";
 
 const status = document.querySelector<HTMLElement>("#build-status");
 const description = document.querySelector<HTMLElement>("#view-description");
 const comparePanel = document.querySelector<HTMLElement>("#compare-panel");
+const repositoryPanel = document.querySelector<HTMLElement>("#repository-panel");
 const coreWorker = new Worker(new URL("../worker/core-worker.ts", import.meta.url), {
   type: "module"
 });
@@ -30,9 +32,15 @@ watchRoute((route) => {
   if (comparePanel) {
     comparePanel.hidden = route !== "compare";
   }
+  if (repositoryPanel) {
+    repositoryPanel.hidden = route !== "repository";
+  }
 });
 
 connectEdaComparePanel(coreWorker);
+if (repositoryPanel) {
+  connectRepositoryView(repositoryPanel, handleRepositorySelection);
+}
 
 coreWorker.addEventListener("message", (event: MessageEvent<CoreResponse>) => {
   if (!status || event.data.id !== 1) {
@@ -45,6 +53,11 @@ coreWorker.addEventListener("message", (event: MessageEvent<CoreResponse>) => {
     status.textContent = `Core error: ${event.data.message}`;
   }
 });
+
+function handleRepositorySelection(_selection: RepositorySelection): void {
+  // The repository provider is intentionally read-only in this v1 block.
+  // Commit selection will be connected to the existing compare controller next.
+}
 
 const request: CoreRequest = { id: 1, type: "status" };
 coreWorker.postMessage(request);

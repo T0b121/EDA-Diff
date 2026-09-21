@@ -28,12 +28,12 @@ validation.
 - Interactive PCB viewport with pan, cursor-centered zoom, fit-to-board, and Before/After visibility controls.
 - Canonical PCB layer metadata with per-layer visibility controls in the visual diff.
 - Hash-based SPA routing compatible with static GitHub Pages.
+- Public GitHub repository history browsing with revision and KiCad file selection.
 - Browser storage, file-source, and repository-provider boundaries.
 
-KiCad import and semantic comparison are intentionally incomplete at this stage.
-PCB zones, additional board graphics/rules, schematic pin connectivity, inferred
-nets, richer front/back presentation, additional symbol graphic primitives/styles,
-and connectivity-aware schematic rendering remain planned.
+KiCad import and semantic comparison remain intentionally scoped. PCB zones,
+additional board graphics/rules, full schematic connectivity inference, and
+write/merge workflows remain planned after the first stable release.
 
 ## Architecture
 

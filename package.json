@@ -5,7 +5,7 @@
   ],
   "name": "eda-diff",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build:core": "wasm-pack build src/core --target web --out-dir ../web/generated/core --release",
